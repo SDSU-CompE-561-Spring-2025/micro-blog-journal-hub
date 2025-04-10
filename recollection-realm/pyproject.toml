@@ -24,7 +24,12 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "fastapi>=0.103.1",
+  "uvicorn>=0.23.2",
+  "sqlalchemy>=2.0.20",
+  "pydanctic>=2.3.0"
+]
 
 [project.urls]
 Documentation = "https://github.com/RhiloSotto/recollection-realm#readme"
