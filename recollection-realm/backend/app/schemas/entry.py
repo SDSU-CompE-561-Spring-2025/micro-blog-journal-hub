@@ -6,8 +6,8 @@ class EntryBase(BaseModel):
     title: str
     content: str
     description: Optional[str] = None
-    privacy: int = Fiedl(default=0, ge=1, le=2)
-    tags: Optional[Str] = None
+    privacy: int = Field(default=0, ge=1, le=2)
+    tags: Optional[str] = None
     categories: Optional[str] = None
 
 class EntryCreate(EntryBase):
