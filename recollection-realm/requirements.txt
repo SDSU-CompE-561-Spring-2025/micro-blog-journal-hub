@@ -1,0 +1,4 @@
+pydantics 
+uvicorn
+fastapi
+sqlalchemy
