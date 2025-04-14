@@ -16,9 +16,9 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
     password: Optional[str] = None
-    bio: Optional[Str] = None 
+    bio: Optional[str] = None 
 
-class User(UserBase)
+class User(UserBase):
     id: int
     creation_date: datetime
 
