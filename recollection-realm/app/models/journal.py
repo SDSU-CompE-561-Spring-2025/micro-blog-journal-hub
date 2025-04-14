@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from app.database.connection import Base
+from ..database.connection import Base
 
 # Many-to-many relationship for collaborators
 journal_collaborators = Table(

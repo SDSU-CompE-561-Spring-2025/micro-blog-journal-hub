@@ -1,9 +1,7 @@
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
-
-Base = declarative_base()
+from ..database import Base  # Adjusted to use a relative import
 
 class Entry(Base):
     __tablename__ = "entries"

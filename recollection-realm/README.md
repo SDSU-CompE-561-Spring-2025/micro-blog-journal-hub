@@ -1,4 +1,4 @@
-# recollection-realm
+# recollection_realm
 
 [![PyPI - Version](https://img.shields.io/pypi/v/recollection-realm.svg)](https://pypi.org/project/recollection-realm)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/recollection-realm.svg)](https://pypi.org/project/recollection-realm)

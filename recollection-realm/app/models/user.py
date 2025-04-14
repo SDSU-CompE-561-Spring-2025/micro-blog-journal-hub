@@ -16,4 +16,4 @@ class User(Base):
     # Relationships
     journals = relationship("Journal", back_populates="owner")
     inherited_journals = relationship("Journal", secondary="journal_inheritors")
-    collaborating_journals = relationship("Journal", secondary="journal_collaborators")
+    collaborators = relationship("Collaborator", back_populates="user")
