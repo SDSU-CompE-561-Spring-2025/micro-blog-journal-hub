@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.database.connection import get_db
-from app.models.user import User
-from app.models.journal import Journal as JournalModel
-from app.schemas.journal import JournalCreate, Journal, JournalUpdate, JournalList
-from app.utils.auth import get_current_user
+from database.connection import get_db
+from models.user import User
+from models.journal import Journal as JournalModel
+from schemas.journal import JournalCreate, Journal, JournalUpdate, JournalList
+from utils.auth import get_current_user
 
 router = APIRouter(prefix="/api/journals", tags=["journals"])
 
