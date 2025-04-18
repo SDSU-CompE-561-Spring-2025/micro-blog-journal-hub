@@ -3,8 +3,8 @@ from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from app.database.connection import get_db
-from app.models.user import User
+from database.connection import get_db
+from models.user import User
 
 # Constants for JWT
 SECRET_KEY = "your-secret-key"  # In production, use a secure key and environment variables
@@ -38,3 +38,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
+#implement a function to hash passwords
+def get_password_hash(password: str):
+    return password  # Replace with actual hashing logic, e.g., using bcrypt

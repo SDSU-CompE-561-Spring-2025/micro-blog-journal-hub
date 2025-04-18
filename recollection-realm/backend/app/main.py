@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from database.connection import engine, Base
-from routers import journal
-from routers import user
+from routers import journal, user
+
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -13,12 +13,10 @@ app = FastAPI(
 )
 
 # Include routers
-app.include_router(user.router)
-app.include_router(journal.router)
+app.include_router(user.router, prefix="/users", tags=["users"])
+app.include_router(journal.router, prefix="/journals", tags=["journals"])
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to RecollectionRealm API"}
 
-
-ip.com/user /journal
