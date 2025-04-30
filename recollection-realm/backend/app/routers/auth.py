@@ -1,21 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Form
-from sqlalchemy.orm import Session
-from app.database.connection import get_db
-from app.models.user import User
-from app.utils.auth import verify_password, create_access_token
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
+from fastapi.responses import JSONResponse
 
-router = APIRouter(prefix="/api", tags=["auth"])
+auth_router = APIRouter()
 
+users_db = {}  # temporary mock DB
 
-@router.post("/login")
-def login(
-    email: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    user = db.query(User).filter(User.email == email).first()
-    if not user or not verify_password(password, user.password):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+class AuthData(BaseModel):
+    username: str
+    password: str
 
-    access_token = create_access_token(data={"sub": str(user.id)})
-    return {"access_token": access_token, "token_type": "bearer"}
+@auth_router.post("/login")
+def login(data: AuthData):
+    user = users_db.get(data.username)
+    if not user or user["password"] != data.password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return {"message": "Login successful", "username": data.username}
+
+@auth_router.post("/register")
+def register(data: AuthData):
+    if data.username in users_db:
+        raise HTTPException(status_code=400, detail="User already exists")
+    users_db[data.username] = {"username": data.username, "password": data.password}
+    return {"message": "Registration successful", "username": data.username}
