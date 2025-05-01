@@ -1,10 +1,16 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
+from models.user import UserCreate
 
 auth_router = APIRouter()
 
 users_db = {}  # temporary mock DB
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    email: str
 
 class AuthData(BaseModel):
     username: str
