@@ -2,7 +2,13 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database.connection import Base
+from pydantic import Basemodel 
 
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+    
 class User(Base):
     __tablename__ = "users"
 
