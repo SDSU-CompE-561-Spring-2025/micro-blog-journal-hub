@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from app.database import engine, Base, connection
 from app.routers import journal, user, entry 
-from fastapi.middleware.cors import CORSMiddleware
 
 
 # Create database tables
@@ -24,3 +23,4 @@ app.include_router(entry.router, prefix="/entries", tags=["entries"])
 @app.get("/")
 def read_root():
     return {"message": "Welcome to RecollectionRealm API"}
+
