@@ -9,10 +9,16 @@ export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const endpoint = isLogin ? "login" : "register"
+
+    if (!isLogin && password !== confirmPassword) {
+      alert("Passwords do not match.")
+      return
+    }
 
     try {
       const res = await fetch(`http://localhost:8000/${endpoint}`, {
@@ -74,9 +80,24 @@ export function AuthForm() {
               required
             />
           </div>
+          {!isLogin && (
+            <div className="space-y-2">
+              <label htmlFor="confirm-password" className="block text-gray-800">
+                Confirm Password:
+              </label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-md"
+                required
+              />
+            </div>
+          )}
           <div className="pt-4 flex flex-col items-center space-y-4">
             <Button type="submit" className="w-32 bg-purple-600 hover:bg-purple-700 text-white rounded-full">
-              {isLogin ? "Login" : "Register"}
+              {isLogin ? "Login" : "Create"}
             </Button>
             <button
               type="button"
