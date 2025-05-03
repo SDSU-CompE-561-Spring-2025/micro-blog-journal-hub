@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from database.connection import Base
+from app.database.connection import Base
 
 class Entry(Base):
     __tablename__ = "entries"
