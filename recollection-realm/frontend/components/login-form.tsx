@@ -47,7 +47,7 @@ export function LoginForm() {
           </div>
           <div className="pt-4 flex flex-col items-center space-y-4">
             <Button type="submit" className="w-32 bg-purple-600 hover:bg-purple-700 text-white rounded-full">Login</Button>
-            <a href="/signup" className="text-blue-600 hover:underline text-sm">Don't have an account? Sign Up</a>
+            <a href="/register" className="text-blue-600 hover:underline text-sm">Don't have an account? Register</a>
           </div>
         </form>
       </CardContent>
