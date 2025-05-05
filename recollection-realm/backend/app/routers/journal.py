@@ -5,7 +5,7 @@ from app.database.connection import get_db
 from app.models.user import User
 from app.models.journal import Journal as JournalModel
 from app.schemas.journal import JournalCreate, Journal, JournalUpdate, JournalList
-from app.utils.auth import get_current_user
+from app.utils.utils import get_current_user
 
 router = APIRouter(prefix="/api/journals", tags=["journals"])
 

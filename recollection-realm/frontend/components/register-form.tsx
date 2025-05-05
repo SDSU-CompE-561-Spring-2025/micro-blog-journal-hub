@@ -19,7 +19,7 @@ export function RegisterForm() {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/register", {
+      const res = await fetch("http://localhost:3000/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,7 +27,14 @@ export function RegisterForm() {
         body: JSON.stringify({ username, password }),
       })
 
-      if (!res.ok) throw new Error("Registration failed")
+      if (res.status === 409) {
+        alert("Username already taken. Please choose another.")
+        return
+      }
+
+      if (!res.ok) {
+        throw new Error("Registration failed")
+      }
 
       alert("Registration successful! You can now login.")
       window.location.href = "/"
