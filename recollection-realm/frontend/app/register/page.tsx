@@ -1,6 +1,6 @@
-import { SignupForm } from "@/components/signup-form"
+import { RegisterForm } from "@/components/register-form"
 
-export default function SignupPage() {
+export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-indigo-700 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -8,7 +8,7 @@ export default function SignupPage() {
           <h1 className="text-xl font-medium">Join us at</h1>
           <h2 className="text-3xl font-bold">RecollectionRealm</h2>
         </div>
-        <SignupForm />
+        <RegisterForm />
       </div>
     </div>
   )
