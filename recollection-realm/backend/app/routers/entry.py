@@ -4,7 +4,7 @@ from typing import List
 from app.database.connection import get_db
 from app.models.entry import Entry as EntryModel
 from app.schemas.entry import EntryCreate, EntryUpdate, Entry as EntryOut
-from app.utils.auth import get_current_user
+from app.utils.utils import get_current_user
 from app.models.user import User
 
 router = APIRouter(

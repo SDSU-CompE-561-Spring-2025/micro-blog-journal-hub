@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.database import engine, Base, connection
-from app.routers import journal, user, entry 
+from app.routers import journal, user, entry, auth 
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -17,7 +17,7 @@ app = FastAPI(
 app.include_router(user.router, prefix="/users", tags=["users"])
 app.include_router(journal.router, prefix="/journals", tags=["journals"])
 app.include_router(entry.router, prefix="/entries", tags=["entries"])
-
+app.include_router(auth.router)
 
 # Root endpoint
 

@@ -4,7 +4,7 @@ from typing import List
 from app.database.connection import get_db
 from app.models.user import User as UserModel
 from app.schemas.user import UserCreate, UserUpdate, User as UserOut
-from app.utils.auth import get_password_hash
+from app.utils.utils import get_password_hash
 
 router = APIRouter(
     prefix="/api/users",
