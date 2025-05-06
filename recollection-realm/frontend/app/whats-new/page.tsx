@@ -1,174 +1,170 @@
+'use client'
 import Image from "next/image"
+import Link from "next/link"
+import { Search } from "lucide-react"
+import React, { useState } from "react"
+import { useRouter } from "next/navigation"
 
-export default function Home() {
+export default function WhatsNew() {
+  const router = useRouter()
+
+  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set())
+  const [posts, setPosts] = useState([
+    {
+      user: "Rhilo Sotto",
+      text: "I explored the vibrant jungles of Costa Rica with breathtaking waterfalls, rare wildlife, and unforgettable hikes. Completing this Bucket List journey felt surreal. Next destination... the tranquil beaches of The Bahamas!",
+      bg: "bg-green-100",
+      image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80",
+      likes: 0,
+      comments: [] as string[],
+      genre: "Adventure",
+      time: "3:42 PM"
+    },
+    {
+      user: "John Guerrero",
+      text: "A spontaneous weekend getaway turned into the best trip this year. Discovered hidden coves, tasted local cuisine, and embraced the calm. Thanks to this amazing new travel app!",
+      bg: "bg-blue-100",
+      image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+      likes: 0,
+      comments: [],
+      genre: "Travel",
+      time: "10:17 AM"
+    },
+    {
+      user: "Maria Chen",
+      text: "Months of persistence and training paid off—crossing that marathon finish line was a life-changing experience! Nothing beats the energy of the crowd and the pride of reaching your goal.",
+      bg: "bg-pink-100",
+      image: "https://images.pexels.com/photos/2402777/pexels-photo-2402777.jpeg",
+      likes: 0,
+      comments: [],
+      genre: "Fitness",
+      time: "7:53 PM"
+    },
+    {
+      user: "Alex Rodriguez",
+      text: "After countless trials, I finally perfected the soufflé. Fluffy, golden, and light as air—turns out, the secret really is in the egg whites. Cooking is truly an art form!",
+      bg: "bg-yellow-100",
+      image: "https://images.pexels.com/photos/4252136/pexels-photo-4252136.jpeg",
+      likes: 0,
+      comments: [],
+      genre: "Cooking",
+      time: "12:05 PM"
+    }
+  ])
+
+  const tabs = [
+    { label: "What's New", href: "/whats-new" },
+    { label: "Create", href: "/create-post" },
+    { label: "Collaborate", href: "/collaboration" },
+    { label: "Friends", href: "/friends" },
+    { label: "Feed", href: "/feed" },
+    { label: "Account Settings", href: "/account-settings" },
+  ]
+
+  const currentPath = "/whats-new"
+
+  const handleLike = (index: number) => {
+    if (likedPosts.has(index)) return
+    const updated = [...posts]
+    updated[index].likes += 1
+    setPosts(updated)
+    setLikedPosts(new Set(likedPosts).add(index))
+  }
+
+  const handleComment = (index: number, comment: string) => {
+    const updated = [...posts]
+    updated[index].comments.push(comment)
+    setPosts(updated)
+  }
+
   return (
-    <main className="min-h-screen w-full bg-white">
-      <div className="relative w-full h-screen overflow-y-auto">
-        {/* Search Bar */}
-        <div className="w-full h-16 bg-gradient-to-r from-[#8F41D3] to-[#121C29] sticky top-0 z-10 flex items-center px-6">
-          <span className="font-inter italic font-semibold text-lg text-white">RecollectionRealm</span>
-          <div className="ml-12 w-1/3 h-10 bg-white rounded-[15px] flex items-center px-4">
-            <span className="font-inter font-normal text-sm text-black opacity-50">Search...</span>
+    <main className="min-h-screen bg-[#F7F7F7]">
+      {/* Search Bar */}
+      <div className="w-full bg-gradient-to-r from-[#8F41D3] to-[#3A6BC5] py-4 px-6 sticky top-0 z-50">
+        <div className="max-w-[1400px] mx-auto flex items-center">
+          <h1 className="text-white font-inter italic text-2xl font-semibold mr-6">RecollectionRealm</h1>
+          <div className="relative flex-1 max-w-3xl">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full py-2 px-4 rounded-full border-none focus:outline-none focus:ring-2 focus:ring-[#8F41D3] text-gray-600"
+            />
+            <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
         </div>
+      </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* Welcome Section */}
-          <div className="w-full md:w-[400px] h-10 mb-6 bg-gradient-to-r from-[rgba(143,65,211,0.8)] via-[rgba(143,65,211,0.8)] to-[rgba(58,107,197,0.8)] rounded-[15px] flex items-center px-4">
-            <span className="font-inter font-normal text-base text-white">Welcome Wilson to What&apos;s New,</span>
-          </div>
-
-          {/* Interests Section */}
-          <div className="w-full bg-gradient-to-r from-[rgba(143,65,211,0.8)] to-[rgba(58,107,197,0.8)] rounded-[15px] p-6 mb-10">
-            <span className="block font-inter font-normal text-base text-white mb-4">What are your interests?</span>
-
-            <div className="flex flex-wrap gap-3">
-              {/* Interest Tags - Row 1 */}
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x Sports</span>
-              </div>
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x News</span>
-              </div>
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x College Resources</span>
-              </div>
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x Diet Plans</span>
-              </div>
-
-              {/* Interest Tags - Row 2 */}
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x The Grammys</span>
-              </div>
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x Conspiracies</span>
-              </div>
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x Cinema</span>
-              </div>
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x Astrology</span>
-              </div>
-
-              {/* Interest Tags - Row 3 */}
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x Playstation</span>
-              </div>
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x History Channel</span>
-              </div>
-              <div className="bg-[rgba(168,13,13,0.51)] rounded-sm px-2 py-1">
-                <span className="font-inter font-normal text-sm text-white">x History Channel</span>
-              </div>
+      <div className="p-6">
+        <div className="max-w-[1400px] mx-auto">
+          {/* Navigation Tabs */}
+          <div className="bg-gradient-to-r from-[rgba(143,65,211,0.5)] to-[rgba(58,107,197,0.5)] rounded-[15px] border border-black mb-6 p-1">
+            <div className="flex justify-between items-center divide-x divide-black">
+              {tabs.map(({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`px-4 py-1 font-inter text-center flex-1 text-[#3A6BC5] hover:underline`}
+                >
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
 
-          {/* Explore Posts Section */}
-          <div className="w-full md:w-[400px] h-10 mb-6 bg-gradient-to-r from-[rgba(143,65,211,0.8)] to-[rgba(58,107,197,0.8)] rounded-[15px] flex items-center px-4">
-            <span className="font-inter font-normal text-base text-white">Explore posts from around the world!</span>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* First Post */}
-            <div className="w-full bg-[rgba(0,121,40,0.49)] rounded-[15px] p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="w-full md:w-3/5 bg-white rounded-[15px] p-4">
-                  <span className="block font-inter font-normal text-base text-[#68AC43] mb-2">Rhilo Sotto:</span>
-                  <p className="font-inter font-normal text-sm text-[#68AC43]">
-                    I explored the jungles of Costa Rica and finally got to complete one of my Bucket List Explorations.
-                    Next stop... The Bahamas! -Rhilo, over and out 3/16/25 at 5:03pm
-                  </p>
-                </div>
-                <div className="w-full md:w-2/5">
-                  <Image
-                    src="/placeholder.svg?height=200&width=300"
-                    alt="Costa Rica jungle"
-                    width={300}
-                    height={200}
-                    className="object-cover rounded-lg w-full h-auto"
-                  />
-                  <span className="block font-inter font-normal text-sm text-[#408DC4] mt-2 text-right">
-                    Click to see more...
-                  </span>
-                </div>
+          {/* What's New Feed */}
+          <div className="bg-purple-500 rounded-t-2xl border border-black overflow-hidden">
+            <div className="p-3 border-b border-black flex justify-between items-center">
+              <h2 className="text-white font-inter text-lg">What's New Feed</h2>
+              <div className="text-sm text-blue-300 italic flex-grow text-right px-4 whitespace-nowrap overflow-hidden text-ellipsis">
+                Explore: Adventure | Travel | Fitness | Cooking | Gaming | Photography | Nature | Technology | Wellness | Art | Food | Hiking | Reading
               </div>
             </div>
-
-            {/* Second Post */}
-            <div className="w-full bg-[rgba(18,159,184,0.4)] rounded-[15px] p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="w-full md:w-3/5 bg-white rounded-[15px] p-4">
-                  <p className="font-inter font-normal text-sm text-black">
-                    John Guerrero: It&apos;s been too long since I&apos;ve enjoyed a nice clear weekend getaway. We
-                    tried out this new app to book our dream vacation spot and let me tell you, it was worth every
-                    penny!
-                  </p>
+            <div className="bg-[#D9D9D9] border-t border-black p-4 space-y-4">
+              {posts.map((post, idx) => (
+                <div key={idx} className={`p-3 rounded-md border border-black flex flex-col gap-2 ${post.bg}`}>
+                  <div className="flex gap-4">
+                    <div className="w-64 h-40 flex-shrink-0 border border-black rounded-md overflow-hidden">
+                      <Image src={post.image} alt={`${post.user} image`} width={256} height={160} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex flex-col justify-between flex-grow">
+                      <div>
+                        <h3 className="font-semibold mb-1">{post.user}</h3>
+                        <p className="text-sm text-gray-700">{post.text}</p>
+                      </div>
+                      <div className="text-xs text-gray-500 text-right">Posted at {post.time}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 mt-2">
+                    <button onClick={() => handleLike(idx)} className="text-sm text-blue-700 hover:underline">
+                      👍 {post.likes}
+                    </button>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        const comment = e.currentTarget.elements.namedItem("comment") as HTMLInputElement
+                        handleComment(idx, comment.value)
+                        comment.value = ""
+                      }}
+                      className="flex flex-grow items-center gap-2"
+                    >
+                      <input name="comment" placeholder="Add a comment..." className="flex-grow px-2 py-1 text-sm border border-gray-400 rounded" />
+                      <button type="submit" className="text-sm text-green-700 hover:underline">Post</button>
+                    </form>
+                  </div>
+                  {post.comments.length > 0 && (
+                    <div className="ml-4 mt-2 space-y-1 text-sm text-gray-800">
+                      {post.comments.map((c, i) => (
+                        <div key={i}>💬 {c}</div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="w-full md:w-2/5">
-                  <Image
-                    src="/placeholder.svg?height=200&width=300"
-                    alt="Weekend getaway"
-                    width={300}
-                    height={200}
-                    className="object-cover rounded-lg w-full h-auto"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Posts for Full Screen */}
-            <div className="w-full bg-[rgba(211,65,143,0.4)] rounded-[15px] p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="w-full md:w-3/5 bg-white rounded-[15px] p-4">
-                  <span className="block font-inter font-normal text-base text-[#D3418F] mb-2">Maria Chen:</span>
-                  <p className="font-inter font-normal text-sm text-[#D3418F]">
-                    Just finished my first marathon! Six months of training paid off. The feeling of crossing that
-                    finish line was indescribable. Already planning my next one for the fall!
-                  </p>
-                </div>
-                <div className="w-full md:w-2/5">
-                  <Image
-                    src="/placeholder.svg?height=200&width=300"
-                    alt="Marathon finish"
-                    width={300}
-                    height={200}
-                    className="object-cover rounded-lg w-full h-auto"
-                  />
-                  <span className="block font-inter font-normal text-sm text-[#408DC4] mt-2 text-right">
-                    Click to see more...
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full bg-[rgba(211,143,65,0.4)] rounded-[15px] p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="w-full md:w-3/5 bg-white rounded-[15px] p-4">
-                  <span className="block font-inter font-normal text-base text-[#D38F41] mb-2">Alex Rodriguez:</span>
-                  <p className="font-inter font-normal text-sm text-[#D38F41]">
-                    My cooking journey continues! Today I mastered the perfect soufflé after three failed attempts. The
-                    secret is all in the egg whites and patience. Check out the result!
-                  </p>
-                </div>
-                <div className="w-full md:w-2/5">
-                  <Image
-                    src="/placeholder.svg?height=200&width=300"
-                    alt="Soufflé"
-                    width={300}
-                    height={200}
-                    className="object-cover rounded-lg w-full h-auto"
-                  />
-                  <span className="block font-inter font-normal text-sm text-[#408DC4] mt-2 text-right">
-                    Click to see more...
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
+
         </div>
       </div>
     </main>
   )
 }
-

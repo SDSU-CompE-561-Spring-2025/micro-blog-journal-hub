@@ -1,4 +1,6 @@
-import { Calendar, CheckSquare, Search, User } from "lucide-react"
+'use client'
+import { Calendar, CheckSquare, Search, User } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Dashboard() {
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -6,7 +8,6 @@ export default function Dashboard() {
   const currentMonth = currentDate.toLocaleString("default", { month: "long" })
   const currentYear = currentDate.getFullYear()
 
-  // Generate calendar days for current month
   const daysInMonth = new Date(currentYear, currentDate.getMonth() + 1, 0).getDate()
   const firstDayOfMonth = new Date(currentYear, currentDate.getMonth(), 1).getDay()
 
@@ -75,25 +76,25 @@ export default function Dashboard() {
           {/* Navigation Tabs */}
           <div className="bg-gradient-to-r from-[rgba(143,65,211,0.5)] to-[rgba(58,107,197,0.5)] rounded-[15px] border border-black mb-6 p-1">
             <div className="flex justify-between items-center">
-              <a href="#" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
-                What&apos;s New
-              </a>
+              <Link href="/whats-new" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
+                What's New
+              </Link>
               <div className="h-4 border-l border-black"></div>
-              <a href="#" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
+              <Link href="/create" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
                 Create
-              </a>
+              </Link>
               <div className="h-4 border-l border-black"></div>
-              <a href="#" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
+              <Link href="/collaborate" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
                 Collaborate
-              </a>
+              </Link>
               <div className="h-4 border-l border-black"></div>
-              <a href="#" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
+              <Link href="/friends" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
                 Friends
-              </a>
+              </Link>
               <div className="h-4 border-l border-black"></div>
-              <a href="#" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
+              <Link href="/account-settings" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
                 Account Settings
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -145,7 +146,7 @@ export default function Dashboard() {
                     <div
                       key={index}
                       className={`border-b border-r border-black p-2 ${
-                        day === currentDate.getDate() ? "bg-[#7650E6] text-white" : ""
+                        day === currentDate.getDate() ? 'bg-[#7650E6] text-white' : ''
                       }`}
                     >
                       {day !== null && <span className="text-sm font-inter">{day}</span>}
@@ -167,7 +168,6 @@ export default function Dashboard() {
                     <p className="text-sm text-gray-700">Don't forget to bring snacks for the movie night on Friday!</p>
                     <div className="text-xs text-gray-500 mt-2">Posted 2 hours ago</div>
                   </div>
-
                   <div className="bg-white p-3 rounded-md shadow border border-gray-300">
                     <h3 className="font-semibold mb-1">Project Update</h3>
                     <p className="text-sm text-gray-700">
@@ -175,7 +175,6 @@ export default function Dashboard() {
                     </p>
                     <div className="text-xs text-gray-500 mt-2">Posted yesterday</div>
                   </div>
-
                   <div className="bg-white p-3 rounded-md shadow border border-gray-300">
                     <h3 className="font-semibold mb-1">Weekend Plans</h3>
                     <p className="text-sm text-gray-700">
