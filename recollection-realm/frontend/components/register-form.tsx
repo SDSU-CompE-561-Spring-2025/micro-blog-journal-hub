@@ -91,7 +91,7 @@ export function RegisterForm() {
 
       setSubmitSuccess("Registration successful!")
       setTimeout(() => {
-        window.location.href = "/"
+        window.location.href = "/login"
       }, 2000)
     } catch (err) {
       console.error(err)
