@@ -8,7 +8,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir hatch
 
 # Copy project files
-COPY backend .
+COPY . .
 
 # Install dependencies using Hatch
 RUN hatch env create
@@ -17,4 +17,4 @@ RUN hatch env create
 EXPOSE 8000
 
 # Run FastAPI with Uvicorn
-CMD ["hatch", "run", "api:uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["hatch", "run", "api:uvicorn"]
