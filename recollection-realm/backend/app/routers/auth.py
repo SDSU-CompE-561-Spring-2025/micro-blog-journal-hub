@@ -26,6 +26,12 @@ class AuthData(BaseModel):
 
 
 @router.post("/login")
+#def login_user(request: LoginRequest, db: Session = Depends(get_db)):
+#    user = get_user_by_username(db, request.username)
+#    if not user or not verify_password(request.password, user.hashed_password):
+#        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+#    return {"message": "Login successful", "username": user.username}
+
 def login(data: AuthData):
     user = users_db.get(data.username)
     if not user or user["password"] != data.password:
@@ -58,3 +64,21 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return {"message": "User registered successfully"}
+
+
+@router.get("/users")
+def get_all_users(db: Session = Depends(get_db)):
+    try:
+        users = db.query(models.User).all()
+        return [
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email
+                # Do not return password hash
+            }
+            for user in users
+        ]
+    except Exception as e:
+        print("Database query error:", e)
+        raise HTTPException(status_code=500, detail="Internal server error")

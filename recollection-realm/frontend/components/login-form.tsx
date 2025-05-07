@@ -8,12 +8,14 @@ import { Card, CardContent } from "@/components/ui/card"
 export function LoginForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError("") // Reset any previous errors
 
     try {
-      const res = await fetch("http://localhost:3000/login", {
+      const res = await fetch("http://localhost:8000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,7 +29,7 @@ export function LoginForm() {
       console.log("Login success:", data)
       window.location.href = "/feed"
     } catch (err) {
-      alert("Login failed. Please try again.")
+      setError("Login failed. Please check your credentials.")
       console.error(err)
     }
   }
@@ -45,6 +47,11 @@ export function LoginForm() {
             <label htmlFor="password" className="block text-gray-800">Password:</label>
             <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
+
+          {error && (
+            <div className="text-red-600 text-sm text-center pt-2">{error}</div>
+          )}
+
           <div className="pt-4 flex flex-col items-center space-y-4">
             <Button type="submit" className="w-32 bg-purple-600 hover:bg-purple-700 text-white rounded-full">Login</Button>
             <a href="/register" className="text-blue-600 hover:underline text-sm">Don't have an account? Register</a>

@@ -6,7 +6,7 @@ class EntryBase(BaseModel):
     title: str
     content: str
     description: Optional[str] = None
-    privacy: int = Field(default=0, ge=1, le=2)
+    privacy: int = Field(default=0, ge=0, le=2)
     tags: Optional[str] = None
     categories: Optional[str] = None
 
@@ -27,7 +27,7 @@ class Entry(BaseModel):
     id: int
     creation_date: datetime
     journal_id: int
-    #(user id? if so)  user_id: int
+    user_id: int
 
     class Config:
         orm_mode = True
