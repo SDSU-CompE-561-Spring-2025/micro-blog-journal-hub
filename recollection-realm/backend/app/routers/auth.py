@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate
 from app.utils.utils import get_password_hash
 from app.database import get_db
-from app.models import User  # <-- Add this
+from app.models.user import User  # <-- Add this
 
 
 router = APIRouter()
@@ -14,10 +14,10 @@ router = APIRouter()
 users_db = {}  # temporary mock DB
 
 
-class UserCreate(BaseModel):
-    username: str
-    password: str
-    email: str
+#class UserCreate(BaseModel):
+#    username: str
+#    password: str
+#    email: str
 
 
 class AuthData(BaseModel):
@@ -47,7 +47,11 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
             status_code=409, detail="Username already registered")
 
     hashed_password = get_password_hash(user.password)
-    new_user = User(username=user.username, password=hashed_password)
+    new_user = User(username=user.username, 
+                    email=user.email,
+                    full_name=user.full_name,
+                    bio=user.bio,
+                    password=hashed_password)
 
     db.add(new_user)
     db.commit()

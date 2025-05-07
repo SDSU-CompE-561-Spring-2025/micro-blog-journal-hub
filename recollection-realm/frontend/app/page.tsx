@@ -6,7 +6,7 @@ import { LoginForm } from "@/components/login-form"
 
 
 
-export default async function Page() {
+/*export default async function Page() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
 
@@ -19,7 +19,7 @@ export default async function Page() {
       ))}
     </ul>
   )
-}
+} */
 
 export default function Home() {
   return (

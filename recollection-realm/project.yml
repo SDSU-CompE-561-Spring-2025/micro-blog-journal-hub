@@ -7,7 +7,7 @@ info:
     multimedia-rich digital journals. Features include private/public sharing,
     collaboration, inheritance settings, and more.
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:8000
 paths:
   /users:
     get:
