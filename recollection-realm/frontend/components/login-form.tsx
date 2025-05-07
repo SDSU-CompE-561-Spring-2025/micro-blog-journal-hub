@@ -1,56 +1,92 @@
 "use client"
-
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
 
 export function LoginForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("") // for registration
+  const [isRegister, setIsRegister] = useState(false)
+  const [message, setMessage] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const endpoint = isRegister ? "/register" : "/login"
+    const payload = isRegister
+      ? { username, password, email }
+      : { username, password }
+
     try {
-      const res = await fetch("http://localhost:3000/login", {
+      const res = await fetch(`http://localhost:8000${endpoint}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       })
 
-      if (!res.ok) throw new Error("Login failed")
-
       const data = await res.json()
-      console.log("Login success:", data)
-      window.location.href = "/feed"
-    } catch (err) {
-      alert("Login failed. Please try again.")
-      console.error(err)
+      if (!res.ok) throw new Error(data.detail || "Something went wrong")
+      setMessage(data.message)
+    } catch (err: any) {
+      setMessage(err.message)
     }
   }
 
   return (
-    <Card className="bg-gray-200 rounded-lg">
-      <CardContent className="pt-6">
-        <h2 className="text-3xl font-bold text-center mb-6">Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="username" className="block text-gray-800">Username:</label>
-            <Input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-gray-800">Password:</label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          </div>
-          <div className="pt-4 flex flex-col items-center space-y-4">
-            <Button type="submit" className="w-32 bg-purple-600 hover:bg-purple-700 text-white rounded-full">Login</Button>
-            <a href="/register" className="text-blue-600 hover:underline text-sm">Don't have an account? Register</a>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded shadow-md">
+      <h2 className="text-2xl font-bold mb-2 text-center">
+        {isRegister ? "Create an Account" : "Log In"}
+      </h2>
+
+      <input
+        className="w-full p-2 border rounded"
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={e => setUsername(e.target.value)}
+        required
+      />
+
+      {isRegister && (
+        <input
+          className="w-full p-2 border rounded"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+        />
+      )}
+
+      <input
+        className="w-full p-2 border rounded"
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        required
+      />
+
+      <button
+        type="submit"
+        className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+      >
+        {isRegister ? "Sign Up" : "Log In"}
+      </button>
+
+      <button
+        type="button"
+        className="text-sm text-blue-500 underline mt-2 w-full text-center"
+        onClick={() => {
+          setIsRegister(!isRegister);
+          setMessage("");
+        }}
+      >
+        {isRegister ? "Already have an account? Log in" : "No account? Register"}
+      </button>
+
+      {message && (
+        <p className="text-center mt-2 text-sm text-red-600">{message}</p>
+      )}
+    </form>
   )
 }

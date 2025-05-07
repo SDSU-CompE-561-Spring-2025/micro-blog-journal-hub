@@ -37,7 +37,7 @@ export default function WhatsNew() {
       image: "https://images.pexels.com/photos/2402777/pexels-photo-2402777.jpeg",
       likes: 0,
       comments: [],
-      genre: "Fitness",
+      genre: "Fitness",``
       time: "7:53 PM"
     },
     {
