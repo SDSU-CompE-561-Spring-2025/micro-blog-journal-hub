@@ -1,4 +1,5 @@
 import { Header } from "@/components/header"
+import NavBar from "@/components/Navbar"
 import { InterestTags } from "@/components/interest-tags"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ImagePlus } from "lucide-react"
@@ -8,6 +9,8 @@ export default function CreatePostPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
+      <NavBar />
+
       <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
         <h1 className="text-2xl font-bold mb-4">Create post:</h1>
 

@@ -1,4 +1,5 @@
 import { Header } from "@/components/header"
+import NavBar from "@/components/Navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus } from "lucide-react"
@@ -7,6 +8,8 @@ export default function CollaborationPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
+      <NavBar />
+      
       <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
         <h1 className="text-2xl font-bold mb-4">Collaboration</h1>
 
