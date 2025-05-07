@@ -25,7 +25,7 @@ export function LoginForm() {
 
       const data = await res.json()
       console.log("Login success:", data)
-      window.location.href = "/feed"
+      window.location.href = "/whats-new"
     } catch (err) {
       alert("Login failed. Please try again.")
       console.error(err)
