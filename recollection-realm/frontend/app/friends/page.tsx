@@ -1,11 +1,14 @@
 import { Header } from "@/components/header"
 import { FriendsList } from "@/components/friends-list"
 import { FriendPost } from "@/components/friend-post"
+import NavBar from "@/components/Navbar"
 
 export default function FriendsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
+      <NavBar />
+
       <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
         <div className="grid grid-cols-2 gap-4 mb-8">
           <FriendsList

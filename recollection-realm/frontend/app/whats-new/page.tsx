@@ -1,4 +1,6 @@
 'use client'
+import { Header } from "@/components/header"
+import NavBar from "@/components/Navbar"
 import Image from "next/image"
 import Link from "next/link"
 import { Search } from "lucide-react"
@@ -52,17 +54,6 @@ export default function WhatsNew() {
     }
   ])
 
-  const tabs = [
-    { label: "What's New", href: "/whats-new" },
-    { label: "Create", href: "/create-post" },
-    { label: "Collaborate", href: "/collaboration" },
-    { label: "Friends", href: "/friends" },
-    { label: "Feed", href: "/feed" },
-    { label: "Account Settings", href: "/account-settings" },
-  ]
-
-  const currentPath = "/whats-new"
-
   const handleLike = (index: number) => {
     if (likedPosts.has(index)) return
     const updated = [...posts]
@@ -79,38 +70,11 @@ export default function WhatsNew() {
 
   return (
     <main className="min-h-screen bg-[#F7F7F7]">
-      {/* Search Bar */}
-      <div className="w-full bg-gradient-to-r from-[#8F41D3] to-[#3A6BC5] py-4 px-6 sticky top-0 z-50">
-        <div className="max-w-[1400px] mx-auto flex items-center">
-          <h1 className="text-white font-inter italic text-2xl font-semibold mr-6">RecollectionRealm</h1>
-          <div className="relative flex-1 max-w-3xl">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full py-2 px-4 rounded-full border-none focus:outline-none focus:ring-2 focus:ring-[#8F41D3] text-gray-600"
-            />
-            <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-        </div>
-      </div>
+      <Header />
+      <NavBar />
 
       <div className="p-6">
         <div className="max-w-[1400px] mx-auto">
-          {/* Navigation Tabs */}
-          <div className="bg-gradient-to-r from-[rgba(143,65,211,0.5)] to-[rgba(58,107,197,0.5)] rounded-[15px] border border-black mb-6 p-1">
-            <div className="flex justify-between items-center divide-x divide-black">
-              {tabs.map(({ label, href }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`px-4 py-1 font-inter text-center flex-1 text-[#3A6BC5] hover:underline`}
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
           {/* What's New Feed */}
           <div className="bg-purple-500 rounded-t-2xl border border-black overflow-hidden">
             <div className="p-3 border-b border-black flex justify-between items-center">

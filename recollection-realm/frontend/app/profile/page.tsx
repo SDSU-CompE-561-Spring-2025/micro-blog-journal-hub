@@ -2,11 +2,14 @@ import { Header } from "@/components/header"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { UserCircle } from "lucide-react"
+import NavBar from "@/components/Navbar"
 
 export default function ProfilePage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
+      <NavBar />
+
       <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="flex flex-col items-center">

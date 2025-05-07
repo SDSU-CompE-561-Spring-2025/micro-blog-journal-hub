@@ -1,6 +1,7 @@
 'use client'
-import { Calendar, CheckSquare, Search, User } from 'lucide-react'
-import Link from 'next/link'
+import { Header } from "@/components/header"
+import NavBar from "@/components/Navbar"
+import { Calendar, CheckSquare } from 'lucide-react'
 
 export default function Dashboard() {
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -43,20 +44,8 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-[#F7F7F7]">
-      {/* Search Bar */}
-      <div className="w-full bg-gradient-to-r from-[#8F41D3] to-[#3A6BC5] py-4 px-6 sticky top-0 z-50">
-        <div className="max-w-[1400px] mx-auto flex items-center">
-          <h1 className="text-white font-inter italic text-2xl font-semibold mr-6">RecollectionRealm</h1>
-          <div className="relative flex-1 max-w-3xl">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full py-2 px-4 rounded-full border-none focus:outline-none focus:ring-2 focus:ring-[#8F41D3] text-gray-600"
-            />
-            <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-        </div>
-      </div>
+      <Header />
+      <NavBar />
 
       <div className="p-6">
         <div className="max-w-[1400px] mx-auto">
@@ -64,37 +53,6 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-6">
             <div className="bg-gradient-to-r from-[rgba(143,65,211,0.8)] to-[rgba(89,131,221,0.8)] px-6 py-2 rounded-[15px] border border-black shadow-md">
               <h1 className="text-white font-inter italic font-semibold">Welcome back, John!</h1>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-[#D9D9D9] rounded-full flex items-center justify-center border border-black">
-                <User className="w-6 h-6 text-[#1D1B20]" />
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="bg-gradient-to-r from-[rgba(143,65,211,0.5)] to-[rgba(58,107,197,0.5)] rounded-[15px] border border-black mb-6 p-1">
-            <div className="flex justify-between items-center">
-              <Link href="/whats-new" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
-                What's New
-              </Link>
-              <div className="h-4 border-l border-black"></div>
-              <Link href="/create" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
-                Create
-              </Link>
-              <div className="h-4 border-l border-black"></div>
-              <Link href="/collaborate" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
-                Collaborate
-              </Link>
-              <div className="h-4 border-l border-black"></div>
-              <Link href="/friends" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
-                Friends
-              </Link>
-              <div className="h-4 border-l border-black"></div>
-              <Link href="/account-settings" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
-                Account Settings
-              </Link>
             </div>
           </div>
 
