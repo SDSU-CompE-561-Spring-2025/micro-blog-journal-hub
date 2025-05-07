@@ -2,8 +2,6 @@
 import { Header } from "@/components/header"
 import NavBar from "@/components/Navbar"
 import Image from "next/image"
-import Link from "next/link"
-import { Search } from "lucide-react"
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 
