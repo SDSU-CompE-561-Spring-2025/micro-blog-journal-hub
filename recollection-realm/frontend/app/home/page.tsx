@@ -80,7 +80,7 @@ export default function Dashboard() {
                 What's New
               </Link>
               <div className="h-4 border-l border-black"></div>
-              <Link href="/create" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
+              <Link href="/create-post" className="px-4 py-1 text-[#3A6BC5] font-inter text-center flex-1">
                 Create
               </Link>
               <div className="h-4 border-l border-black"></div>
