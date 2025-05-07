@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react"
 import { Header } from "@/components/header"
 import NavBar from "@/components/Navbar"
-import { Calendar, CheckSquare } from 'lucide-react'
+import { Calendar, CheckSquare, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function Dashboard() {
   const [username, setUsername] = useState<string | null>(null)
   const [checklist, setChecklist] = useState<{ text: string; checked: boolean }[]>([])
   const [newItem, setNewItem] = useState("")
+  const [selectedDate, setSelectedDate] = useState<{ day: number, type: string } | null>(null)
+  const [viewMonth, setViewMonth] = useState(new Date().getMonth())
+  const [viewYear, setViewYear] = useState(new Date().getFullYear())
+  const [descriptions, setDescriptions] = useState<{ [key: string]: string }>({})
 
   useEffect(() => {
     const storedUser = localStorage.getItem("username")
@@ -16,17 +20,38 @@ export default function Dashboard() {
   }, [])
 
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-  const currentDate = new Date()
-  const currentMonth = currentDate.toLocaleString("default", { month: "long" })
-  const currentYear = currentDate.getFullYear()
 
-  const daysInMonth = new Date(currentYear, currentDate.getMonth() + 1, 0).getDate()
-  const firstDayOfMonth = new Date(currentYear, currentDate.getMonth(), 1).getDay()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay()
+  const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate()
 
-  const calendarDays = Array.from({ length: 35 }, (_, i) => {
+  const calendarDays = Array.from({ length: 42 }, (_, i) => {
     const day = i - firstDayOfMonth + 1
-    return day > 0 && day <= daysInMonth ? day : null
+    if (day <= 0) return { day: prevMonthDays + day, type: 'prev' }
+    if (day > daysInMonth) return { day: day - daysInMonth, type: 'next' }
+    return { day, type: 'current' }
   })
+
+  const currentDate = new Date()
+  const isToday = (day: number, type: string) => {
+    return (
+      type === 'current' &&
+      day === currentDate.getDate() &&
+      viewMonth === currentDate.getMonth() &&
+      viewYear === currentDate.getFullYear()
+    )
+  }
+
+  const isSelected = (day: number, type: string) => {
+    return selectedDate?.day === day && selectedDate?.type === type
+  }
+
+  const selectedKey = selectedDate ? `${viewYear}-${viewMonth}-${selectedDate.day}-${selectedDate.type}` : ""
+
+  const hasNote = (day: number, type: string) => {
+    const key = `${viewYear}-${viewMonth}-${day}-${type}`
+    return !!descriptions[key]?.trim()
+  }
 
   return (
     <main className="min-h-screen bg-[#F7F7F7]">
@@ -35,7 +60,6 @@ export default function Dashboard() {
 
       <div className="p-6">
         <div className="max-w-[1400px] mx-auto">
-          {/* Header Section */}
           <div className="flex justify-between items-center mb-6">
             <div className="bg-gradient-to-r from-[rgba(143,65,211,0.8)] to-[rgba(89,131,221,0.8)] px-6 py-2 rounded-[15px] border border-black shadow-md">
               <h1 className="text-white font-inter italic font-semibold">
@@ -44,7 +68,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {/* Checklist */}
             <div className="bg-gradient-to-b from-[rgba(143,65,211,0.8)] to-[rgba(58,107,197,0.8)] rounded-[15px] border border-black shadow-md overflow-hidden">
@@ -52,7 +75,6 @@ export default function Dashboard() {
                 <h2 className="text-white font-inter flex items-center gap-2">
                   <CheckSquare className="w-4 h-4" /> Daily Checklist
                 </h2>
-                {/* Add item form */}
                 <form
                   onSubmit={(e) => {
                     e.preventDefault()
@@ -75,7 +97,6 @@ export default function Dashboard() {
                   </button>
                 </form>
               </div>
-
               <div className="bg-[#D9D9D9] p-3 h-[500px] overflow-y-auto border-t border-black">
                 <ul className="space-y-2">
                   {checklist.map((item, index) => (
@@ -110,13 +131,31 @@ export default function Dashboard() {
 
             {/* Calendar */}
             <div className="md:col-span-2 bg-gradient-to-b from-[rgba(143,65,211,0.8)] to-[rgba(58,107,197,0.8)] rounded-[15px] border border-black overflow-hidden">
-              <div className="p-3 flex justify-between items-center">
-                <h2 className="text-white font-inter flex items-center gap-2">
+              <div className="p-3">
+                <h2 className="text-white font-inter flex items-center gap-2 mb-2">
                   <Calendar className="w-4 h-4" /> Calendar
                 </h2>
-                <div className="flex gap-2 text-white text-sm">
-                  <span>{currentMonth}</span>
-                  <span>{currentYear}</span>
+                <div className="flex items-center justify-between text-white text-sm w-full">
+                  <button onClick={() => {
+                    if (viewMonth === 0) {
+                      setViewMonth(11)
+                      setViewYear(viewYear - 1)
+                    } else {
+                      setViewMonth(viewMonth - 1)
+                    }
+                  }} className="px-2"><ChevronLeft /></button>
+                  <div className="flex-1 flex justify-center gap-2">
+                    <span>{new Date(viewYear, viewMonth).toLocaleString("default", { month: "long" })}</span>
+                    <span>{viewYear}</span>
+                  </div>
+                  <button onClick={() => {
+                    if (viewMonth === 11) {
+                      setViewMonth(0)
+                      setViewYear(viewYear + 1)
+                    } else {
+                      setViewMonth(viewMonth + 1)
+                    }
+                  }} className="px-2"><ChevronRight /></button>
                 </div>
               </div>
               <div className="bg-[#D9D9D9] border-t border-black">
@@ -128,16 +167,30 @@ export default function Dashboard() {
                   ))}
                 </div>
                 <div className="grid grid-cols-7 h-[300px]">
-                  {calendarDays.map((day, index) => (
+                  {calendarDays.map(({ day, type }, index) => (
                     <div
                       key={index}
-                      className={`border-b border-r border-black p-2 ${
-                        day === currentDate.getDate() ? 'bg-[#7650E6] text-white' : ''
-                      }`}
+                      onClick={() => setSelectedDate({ day, type })}
+                      className={`border-b border-r border-black p-2 cursor-pointer text-sm font-inter
+                        ${type !== 'current' ? 'text-gray-400' : ''}
+                        ${isToday(day, type) ? 'bg-[#7650E6] text-white' : ''}
+                        ${isSelected(day, type) ? 'outline outline-2 outline-black' : ''}`}
                     >
-                      {day !== null && <span className="text-sm font-inter">{day}</span>}
+                      {day}{hasNote(day, type) ? '*' : ''}
                     </div>
                   ))}
+                </div>
+                <div className="p-3">
+                  <textarea
+                    placeholder="Write a note for this date..."
+                    value={selectedKey ? descriptions[selectedKey] || "" : ""}
+                    onChange={(e) => {
+                      if (selectedKey) {
+                        setDescriptions({ ...descriptions, [selectedKey]: e.target.value })
+                      }
+                    }}
+                    className="w-full h-24 p-2 border border-black rounded resize-none text-sm"
+                  />
                 </div>
               </div>
             </div>
