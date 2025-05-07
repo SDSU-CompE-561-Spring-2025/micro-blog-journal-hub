@@ -1,9 +1,13 @@
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
 from app.schemas.user import UserCreate
 from app.utils.utils import get_password_hash
-from fastapi import Depends
+from app.database import get_db
+from app.models import User  # <-- Add this
+
 
 router = APIRouter()
 
