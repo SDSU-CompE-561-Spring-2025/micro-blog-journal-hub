@@ -55,14 +55,21 @@ export default function WhatsNew() {
   ])
 
   const handleLike = (index: number) => {
-    if (likedPosts.has(index)) return
     const updated = [...posts]
-    updated[index].likes += 1
+    const liked = new Set(likedPosts)
+    if (liked.has(index)) {
+      updated[index].likes -= 1
+      liked.delete(index)
+    } else {
+      updated[index].likes += 1
+      liked.add(index)
+    }
     setPosts(updated)
-    setLikedPosts(new Set(likedPosts).add(index))
+    setLikedPosts(liked)
   }
 
   const handleComment = (index: number, comment: string) => {
+    if (!comment.trim()) return
     const updated = [...posts]
     updated[index].comments.push(comment)
     setPosts(updated)
@@ -106,6 +113,7 @@ export default function WhatsNew() {
                       onSubmit={(e) => {
                         e.preventDefault()
                         const comment = e.currentTarget.elements.namedItem("comment") as HTMLInputElement
+                        if (!comment.value.trim()) return
                         handleComment(idx, comment.value)
                         comment.value = ""
                       }}
@@ -126,7 +134,6 @@ export default function WhatsNew() {
               ))}
             </div>
           </div>
-
         </div>
       </div>
     </main>
