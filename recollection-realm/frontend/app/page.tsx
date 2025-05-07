@@ -1,36 +1,180 @@
-import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
+'use client'
 
+import { useEffect, useState } from "react"
+import { Header } from "@/components/header"
+import NavBar from "@/components/Navbar"
+import { Calendar, CheckSquare } from 'lucide-react'
 
-import { LoginForm } from "@/components/login-form"
+export default function Dashboard() {
+  const [username, setUsername] = useState<string | null>(null)
+  const [checklist, setChecklist] = useState<{ text: string; checked: boolean }[]>([])
+  const [newItem, setNewItem] = useState("")
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("username")
+    setUsername(storedUser)
+  }, [])
 
+  const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const currentDate = new Date()
+  const currentMonth = currentDate.toLocaleString("default", { month: "long" })
+  const currentYear = currentDate.getFullYear()
 
-export default async function Page() {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const daysInMonth = new Date(currentYear, currentDate.getMonth() + 1, 0).getDate()
+  const firstDayOfMonth = new Date(currentYear, currentDate.getMonth(), 1).getDay()
 
-  const { data: todos } = await supabase.from('todos').select()
+  const calendarDays = Array.from({ length: 35 }, (_, i) => {
+    const day = i - firstDayOfMonth + 1
+    return day > 0 && day <= daysInMonth ? day : null
+  })
 
   return (
-    <ul>
-      {todos?.map((todo) => (
-        <li>{todo}</li>
-      ))}
-    </ul>
-  )
-}
+    <main className="min-h-screen bg-[#F7F7F7]">
+      <Header />
+      <NavBar />
 
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-500 to-indigo-700 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-gray-200 rounded-lg p-8 mb-8 text-center">
-          <h1 className="text-xl font-medium">Welcome to</h1>
-          <h2 className="text-3xl font-bold">RecollectionRealm</h2>
+      <div className="p-6">
+        <div className="max-w-[1400px] mx-auto">
+          {/* Header Section */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="bg-gradient-to-r from-[rgba(143,65,211,0.8)] to-[rgba(89,131,221,0.8)] px-6 py-2 rounded-[15px] border border-black shadow-md">
+              <h1 className="text-white font-inter italic font-semibold">
+                {username ? `Welcome back, ${username}!` : "Welcome to Recollection Realm!"}
+              </h1>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {/* Checklist */}
+            <div className="bg-gradient-to-b from-[rgba(143,65,211,0.8)] to-[rgba(58,107,197,0.8)] rounded-[15px] border border-black shadow-md overflow-hidden">
+              <div className="p-3">
+                <h2 className="text-white font-inter flex items-center gap-2">
+                  <CheckSquare className="w-4 h-4" /> Daily Checklist
+                </h2>
+                {/* Add item form */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (newItem.trim() !== "") {
+                      setChecklist([...checklist, { text: newItem.trim(), checked: false }])
+                      setNewItem("")
+                    }
+                  }}
+                  className="mt-2 flex gap-2"
+                >
+                  <input
+                    type="text"
+                    value={newItem}
+                    onChange={(e) => setNewItem(e.target.value)}
+                    placeholder="Add new task"
+                    className="flex-1 px-2 py-1 rounded border border-black text-sm"
+                  />
+                  <button type="submit" className="px-3 py-1 bg-black text-white rounded text-sm">
+                    Add
+                  </button>
+                </form>
+              </div>
+
+              <div className="bg-[#D9D9D9] p-3 h-[500px] overflow-y-auto border-t border-black">
+                <ul className="space-y-2">
+                  {checklist.map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        className="rounded border-black"
+                        checked={item.checked}
+                        onChange={() => {
+                          const newChecklist = [...checklist]
+                          newChecklist[index].checked = !newChecklist[index].checked
+                          setChecklist(newChecklist)
+                        }}
+                      />
+                      <span className={`text-sm font-inter flex-1 ${item.checked ? 'line-through text-gray-500' : ''}`}>
+                        {item.text}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const newChecklist = checklist.filter((_, i) => i !== index)
+                          setChecklist(newChecklist)
+                        }}
+                        className="text-red-600 text-sm"
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Calendar */}
+            <div className="md:col-span-2 bg-gradient-to-b from-[rgba(143,65,211,0.8)] to-[rgba(58,107,197,0.8)] rounded-[15px] border border-black overflow-hidden">
+              <div className="p-3 flex justify-between items-center">
+                <h2 className="text-white font-inter flex items-center gap-2">
+                  <Calendar className="w-4 h-4" /> Calendar
+                </h2>
+                <div className="flex gap-2 text-white text-sm">
+                  <span>{currentMonth}</span>
+                  <span>{currentYear}</span>
+                </div>
+              </div>
+              <div className="bg-[#D9D9D9] border-t border-black">
+                <div className="grid grid-cols-7 border-b border-black">
+                  {weekdays.map((day, index) => (
+                    <div key={index} className="text-center py-2 text-sm font-inter">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 h-[300px]">
+                  {calendarDays.map((day, index) => (
+                    <div
+                      key={index}
+                      className={`border-b border-r border-black p-2 ${
+                        day === currentDate.getDate() ? 'bg-[#7650E6] text-white' : ''
+                      }`}
+                    >
+                      {day !== null && <span className="text-sm font-inter">{day}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Posts */}
+            <div className="bg-gradient-to-b from-[rgba(143,65,211,0.8)] to-[rgba(58,107,197,0.8)] rounded-[15px] border border-black overflow-hidden">
+              <div className="p-3">
+                <h2 className="text-white font-inter">Recent Posts</h2>
+              </div>
+              <div className="bg-[#D9D9D9] h-[500px] border-t border-black p-4">
+                <div className="space-y-4">
+                  <div className="bg-white p-3 rounded-md shadow border border-gray-300">
+                    <h3 className="font-semibold mb-1">Movie Night Planning</h3>
+                    <p className="text-sm text-gray-700">Don't forget to bring snacks for the movie night on Friday!</p>
+                    <div className="text-xs text-gray-500 mt-2">Posted 2 hours ago</div>
+                  </div>
+                  <div className="bg-white p-3 rounded-md shadow border border-gray-300">
+                    <h3 className="font-semibold mb-1">Project Update</h3>
+                    <p className="text-sm text-gray-700">
+                      The team has completed the first phase of the project ahead of schedule.
+                    </p>
+                    <div className="text-xs text-gray-500 mt-2">Posted yesterday</div>
+                  </div>
+                  <div className="bg-white p-3 rounded-md shadow border border-gray-300">
+                    <h3 className="font-semibold mb-1">Weekend Plans</h3>
+                    <p className="text-sm text-gray-700">
+                      Anyone interested in hiking this weekend? Weather looks great!
+                    </p>
+                    <div className="text-xs text-gray-500 mt-2">Posted 2 days ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
-        <LoginForm />
       </div>
-    </div>
+    </main>
   )
 }

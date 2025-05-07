@@ -1,7 +1,7 @@
-'use client'
-import { Header } from "@/components/header"
-import NavBar from "@/components/Navbar"
-import { Calendar, CheckSquare } from 'lucide-react'
+//'use client'
+//import { Header } from "@/components/header"
+//import NavBar from "@/components/Navbar"
+//import { Calendar, CheckSquare } from 'lucide-react'
 
 export default function Dashboard() {
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
