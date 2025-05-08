@@ -128,7 +128,7 @@ export function RegisterForm() {
           {submitSuccess && <p className="text-green-600 text-sm text-center">{submitSuccess}</p>}
           <div className="pt-4 flex flex-col items-center space-y-4">
             <Button type="submit" className="w-32 bg-purple-600 hover:bg-purple-700 text-white rounded-full">Create</Button>
-            <a href="/" className="text-blue-600 hover:underline text-sm">Already have an account? Login</a>
+            <a href="/login" className="text-blue-600 hover:underline text-sm">Already have an account? Login</a>
           </div>
         </form>
       </CardContent>
