@@ -1,164 +1,56 @@
-"use client";
+"use client"
 
-import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label"; // Assuming you have a Label component
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const WHATS_NEW_PAGE_PATH = "/whats-new"; // Corrected path
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
 
 export function LoginForm() {
-  const [isLoginMode, setIsLoginMode] = useState(true);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState(""); // For registration
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-    if (isLoginMode) {
-      // --- LOGIN ---
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
+    try {
+      const res = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      })
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: formData.toString(),
-        });
+      if (!res.ok) throw new Error("Login failed")
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.detail || "Login failed. Please check your credentials.");
-        }
-
-        if (data.access_token) {
-          localStorage.setItem("authToken", data.access_token);
-          localStorage.setItem("username", data.username); // Optional: store username
-          // Redirect to the "What's New" page
-          router.push(WHATS_NEW_PAGE_PATH); // <<<< CORRECTED REDIRECT
-        } else {
-          throw new Error("Login failed: No token received.");
-        }
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      // --- REGISTRATION ---
-      if (!email) {
-        setError("Email is required for registration.");
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, email, password }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.detail || "Registration failed. Please try again.");
-        }
-        
-        alert("Registration successful! Please log in.");
-        setIsLoginMode(true);
-        // Optionally clear form fields
-        // setUsername(username); // Keep username if desired for login
-        // setEmail("");
-        // setPassword("");
-
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
+      const data = await res.json()
+      console.log("Login success:", data)
+      window.location.href = "/feed"
+    } catch (err) {
+      alert("Login failed. Please try again.")
+      console.error(err)
     }
-  };
+  }
 
   return (
-    <div className="bg-white shadow-xl rounded-lg p-8 space-y-6">
-      <h3 className="text-2xl font-semibold text-center text-gray-800">
-        {isLoginMode ? "Log In" : "Create Account"}
-      </h3>
-      {error && <p className="text-red-500 text-sm text-center bg-red-100 p-2 rounded">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="username">Username</Label>
-          <Input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="your_username"
-            required
-            className="mt-1"
-          />
-        </div>
-
-        {!isLoginMode && (
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required={!isLoginMode}
-              className="mt-1"
-            />
+    <Card className="bg-gray-200 rounded-lg">
+      <CardContent className="pt-6">
+        <h2 className="text-3xl font-bold text-center mb-6">Login</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="username" className="block text-gray-800">Username:</label>
+            <Input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
           </div>
-        )}
-
-        <div>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-            className="mt-1"
-          />
-        </div>
-
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Processing..." : isLoginMode ? "Log In" : "Sign Up"}
-        </Button>
-      </form>
-      <p className="text-sm text-center text-gray-600">
-        {isLoginMode ? "Don't have an account?" : "Already have an account?"}{" "}
-        <button
-          type="button"
-          onClick={() => {
-            setIsLoginMode(!isLoginMode);
-            setError(null); // Clear errors when switching mode
-          }}
-          className="font-medium text-purple-600 hover:text-purple-500"
-        >
-          {isLoginMode ? "Sign up" : "Log in"}
-        </button>
-      </p>
-    </div>
-  );
+          <div className="space-y-2">
+            <label htmlFor="password" className="block text-gray-800">Password:</label>
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+          <div className="pt-4 flex flex-col items-center space-y-4">
+            <Button type="submit" className="w-32 bg-purple-600 hover:bg-purple-700 text-white rounded-full">Login</Button>
+            <a href="/register" className="text-blue-600 hover:underline text-sm">Don't have an account? Register</a>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  )
 }
