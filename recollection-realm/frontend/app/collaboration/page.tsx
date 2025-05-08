@@ -126,15 +126,12 @@ export default function CollaborationPage() {
           setError(err.message);
         }
     } finally {
-      setIsLoading(false); // This might be called before fetchEntries finishes if it's awaited
-                          // Consider managing loading state more granularly or ensure fetchEntries sets it.
-                          // For now, fetchEntries will set it correctly on its completion.
+      // isLoading is managed by fetchEntries
     }
   };
 
   // Delete an entry
   const handleDeleteEntry = async (entryId: number) => {
-    // Consider a specific loading state for delete if desired, e.g., `isDeleting[entryId] = true`
     setIsLoading(true); 
     setError(null);
     const token = getAuthToken();
@@ -173,34 +170,22 @@ export default function CollaborationPage() {
   useEffect(() => {
     const token = getAuthToken();
     if (!token) {
-      setIsLoading(false); // Set loading to false before redirecting
+      setIsLoading(false); 
       handleUnauthorized("You must be logged in to view this page.");
     } else {
       fetchEntries();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps 
-    // Adding router to dependency array can cause infinite loops if not handled carefully
-    // Typically, you don't need router in deps for this kind of initial load check.
-    // handleUnauthorized is stable if defined outside or memoized.
-  }, []); // Run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
 
-  // If loading and no token was found (and thus redirect initiated), don't render the page content
-  // Or if there's an error that's an auth error and redirect is happening.
-  // This check is a bit tricky as redirect happens async.
-  // The `useEffect` handles initial redirect.
-  // For subsequent API calls, the page might briefly show before redirect.
-  // A global auth context would be better for immediate redirects.
-
-  if (isLoading && !entries.length) {
-    // Show a generic loading screen if we are still loading initially
-    // and haven't been redirected yet (e.g., token exists but fetch is pending)
+  if (isLoading && !entries.length && !error) { // Show loading only if no error and still fetching initial data
     return (
-        <div className="min-h-screen flex flex-col bg-white">
+        <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900">
             <Header />
             <NavBar />
             <main className="flex-1 p-4 max-w-4xl mx-auto w-full flex justify-center items-center">
-                <p className="text-xl">Loading collaboration data...</p>
+                <p className="text-xl text-gray-900 dark:text-slate-100">Loading collaboration data...</p>
             </main>
         </div>
     );
@@ -208,30 +193,27 @@ export default function CollaborationPage() {
 
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900">
       <Header />
       <NavBar />
       
       <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
-        <h1 className="text-2xl font-bold mb-4">Collaboration</h1>
+        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-slate-100">Collaboration</h1>
 
-        {error && <p className="text-red-500 bg-red-100 p-3 rounded mb-4">{error}</p>}
+        {error && <p className="text-red-500 bg-red-100 p-3 rounded mb-4 dark:bg-red-900/30 dark:text-red-400">{error}</p>}
 
-        {/* Only render main content if not loading and no critical auth error causing redirect */}
-        {/* The redirect should handle the view, but this is a fallback */}
         {!isLoading || entries.length > 0 ? (
-            <Card className="bg-gray-200 p-4 mb-6">
+            <Card className="bg-gray-100 dark:bg-gray-800 p-4 mb-6"> {/* Outer card style match */}
             <CardContent className="p-0">
-                {/* Static content remains as is */}
-                <div className="bg-blue-100 rounded-xl p-6 mb-6">
-                <h3 className="text-xl mb-4">Which Journal are we working on today!</h3>
+                <div className="bg-blue-100 dark:bg-slate-700 rounded-xl p-6 mb-6"> {/* Inner section bg match */}
+                <h3 className="text-xl mb-4 text-gray-800 dark:text-slate-100">Which Journal are we working on today!</h3> {/* Text color match */}
                 <div className="grid md:grid-cols-2 gap-4">
-                    <ul className="list-disc pl-6 space-y-1">
+                    <ul className="list-disc pl-6 space-y-1 text-gray-700 dark:text-slate-300"> {/* List text color match */}
                     <li>Sunny San Diego</li>
                     <li>Visit to the beach</li>
                     <li>Friends in Cornado</li>
                     </ul>
-                    <ul className="list-disc pl-6 space-y-1">
+                    <ul className="list-disc pl-6 space-y-1 text-gray-700 dark:text-slate-300"> {/* List text color match */}
                     <li>Cars & Coffee</li>
                     <li>Code 101</li>
                     <li>Thoughts I think of</li>
@@ -240,12 +222,12 @@ export default function CollaborationPage() {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
-                <Card className="bg-blue-100 p-4">
+                <Card className="bg-blue-100 dark:bg-slate-700 p-4"> {/* Inner card style match */}
                     <CardHeader className="p-0 pb-4">
-                    <CardTitle className="text-xl">Add friends:</CardTitle>
+                    <CardTitle className="text-xl text-gray-800 dark:text-slate-100">Add friends:</CardTitle> {/* Title text color match */}
                     </CardHeader>
                     <CardContent className="p-0">
-                    <ul className="list-disc pl-6 space-y-1">
+                    <ul className="list-disc pl-6 space-y-1 text-gray-700 dark:text-slate-300"> {/* List text color match */}
                         <li>Friend 1</li>
                         <li>Friend 2</li>
                         <li>Friend 3</li>
@@ -253,15 +235,14 @@ export default function CollaborationPage() {
                     </CardContent>
                 </Card>
 
-                {/* Entry Creation Card */}
-                <Card className="bg-blue-100 p-4">
+                <Card className="bg-blue-100 dark:bg-slate-700 p-4"> {/* Inner card style match */}
                     <CardHeader className="p-0 pb-4">
-                    <CardTitle className="text-xl">Create New Entry</CardTitle>
+                    <CardTitle className="text-xl text-gray-800 dark:text-slate-100">Create New Entry</CardTitle> {/* Title text color match */}
                     </CardHeader>
                     <CardContent className="p-0">
                     <form onSubmit={handleCreateEntry} className="space-y-4">
                         <div>
-                        <label htmlFor="entryTitle" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="entryTitle" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"> {/* Label text color match */}
                             Title
                         </label>
                         <Input
@@ -270,12 +251,12 @@ export default function CollaborationPage() {
                             placeholder="Entry title"
                             value={newEntryTitle}
                             onChange={(e) => setNewEntryTitle(e.target.value)}
-                            className="bg-white"
+                            className="bg-white dark:bg-slate-600 dark:text-slate-100 dark:placeholder-slate-400 border-gray-300 dark:border-slate-500 focus:ring-blue-500 dark:focus:ring-blue-500" /* Input style match */
                             required
                         />
                         </div>
                         <div>
-                        <label htmlFor="entryContent" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="entryContent" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"> {/* Label text color match */}
                             Content
                         </label>
                         <Textarea
@@ -283,33 +264,32 @@ export default function CollaborationPage() {
                             placeholder="Type your journal entry here...."
                             value={newEntryContent}
                             onChange={(e) => setNewEntryContent(e.target.value)}
-                            className="h-32 bg-white"
+                            className="h-32 bg-white dark:bg-slate-600 dark:text-slate-100 dark:placeholder-slate-400 border-gray-300 dark:border-slate-500 focus:ring-blue-500 dark:focus:ring-blue-500" /* Textarea style match */
                             required
                         />
                         </div>
-                        <Button type="submit" disabled={isLoading} className="w-full">
+                        <Button type="submit" disabled={isLoading} className="w-full"> {/* Button default styling assumed to handle dark mode */}
                         {isLoading ? "Saving..." : "Save Entry"}
                         </Button>
                     </form>
                     </CardContent>
                 </Card>
 
-                {/* Archive Card */}
-                <Card className="bg-blue-100 p-4">
+                <Card className="bg-blue-100 dark:bg-slate-700 p-4"> {/* Inner card style match */}
                     <CardHeader className="p-0 pb-4">
-                    <CardTitle className="text-xl">Archive</CardTitle>
+                    <CardTitle className="text-xl text-gray-800 dark:text-slate-100">Archive</CardTitle> {/* Title text color match */}
                     </CardHeader>
                     <CardContent className="p-0">
-                    {isLoading && entries.length === 0 && <p>Loading entries...</p>}
-                    {!isLoading && !error && entries.length === 0 && <p>No entries found. Create one!</p>}
+                    {isLoading && entries.length === 0 && <p className="text-gray-700 dark:text-slate-300">Loading entries...</p>} {/* Text color match */}
+                    {!isLoading && !error && entries.length === 0 && <p className="text-gray-700 dark:text-slate-300">No entries found. Create one!</p>} {/* Text color match */}
                     {entries.length > 0 && (
                         <ul className="space-y-3">
                         {entries.map((entry) => (
-                            <li key={entry.id} className="p-3 bg-white rounded-md shadow">
+                            <li key={entry.id} className="p-3 bg-white dark:bg-slate-600 rounded-md shadow"> {/* List item bg match */}
                             <div className="flex justify-between items-start">
                                 <div>
-                                <h4 className="font-semibold text-lg">{entry.title}</h4>
-                                <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                                <h4 className="font-semibold text-lg text-gray-800 dark:text-slate-100">{entry.title}</h4> {/* Entry title text color match */}
+                                <p className="text-sm text-gray-600 dark:text-slate-400 whitespace-pre-wrap"> {/* Entry content preview text color match */}
                                     {entry.content.substring(0, 100)}
                                     {entry.content.length > 100 && "..."}
                                 </p>
@@ -321,7 +301,7 @@ export default function CollaborationPage() {
                                 disabled={isLoading}
                                 aria-label="Delete entry"
                                 >
-                                <Trash2 className="h-4 w-4 text-red-500" />
+                                <Trash2 className="h-4 w-4 text-red-500 dark:text-red-400" /> {/* Icon color match */}
                                 </Button>
                             </div>
                             </li>
@@ -331,14 +311,13 @@ export default function CollaborationPage() {
                     </CardContent>
                 </Card>
 
-                {/* Journals Card */}
-                <Card className="bg-blue-100 p-4">
+                <Card className="bg-blue-100 dark:bg-slate-700 p-4"> {/* Inner card style match */}
                     <CardHeader className="p-0 pb-4">
-                    <CardTitle className="text-xl">Journals</CardTitle>
+                    <CardTitle className="text-xl text-gray-800 dark:text-slate-100">Journals</CardTitle> {/* Title text color match */}
                     </CardHeader>
                     <CardContent className="p-0 flex justify-center items-center h-40">
-                    <div className="h-24 w-24 rounded-full border-2 border-black flex items-center justify-center">
-                        <Plus className="h-12 w-12" />
+                    <div className="h-24 w-24 rounded-full border-2 border-black dark:border-slate-500 flex items-center justify-center"> {/* Border color match */}
+                        <Plus className="h-12 w-12 text-gray-700 dark:text-slate-300" /> {/* Icon color match */}
                     </div>
                     </CardContent>
                 </Card>
@@ -346,10 +325,7 @@ export default function CollaborationPage() {
             </CardContent>
             </Card>
         ) : (
-            // This part is mainly for when initial loading is true, or error indicates no content should be shown
-            // If redirection is happening, this might show briefly or not at all.
-            // The loading screen above is more specific for initial load.
-            <p>{error ? "" : "Checking authentication..."}</p>
+             !error && <p className="text-gray-700 dark:text-slate-300">Checking authentication...</p> // Fallback text color match
         )}
       </main>
     </div>
