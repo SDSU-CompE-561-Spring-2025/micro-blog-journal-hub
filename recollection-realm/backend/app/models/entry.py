@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database.connection import Base
 
+
 class Entry(Base):
     __tablename__ = "entries"
 
@@ -12,6 +13,6 @@ class Entry(Base):
     privacy = Column(Integer, default=0)  # 0=private, 1=shared, 2=public
     creation_date = Column(DateTime, default=datetime.utcnow)
     journal_id = Column(Integer, ForeignKey("journals.id"), nullable=False)
-    
+
     # Relationships
     journal = relationship("Journal", back_populates="entries")
