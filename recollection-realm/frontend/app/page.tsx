@@ -130,7 +130,7 @@ export default function Dashboard() {
         {/* Tabs */}
         <div className="bg-gradient-to-r from-purple-300 to-blue-300 rounded-[15px] border border-black p-1">
           <div className="flex justify-between items-center divide-x divide-black">
-            {["whats-new", "create-post", "collaboration", "friends", "feed", "account-settings"].map(tab => (
+            {["whats-new", "create-post", "collaboration", "friends", "feed", "profile"].map(tab => (
               <Link
                 key={tab}
                 href={`/${tab}`}
