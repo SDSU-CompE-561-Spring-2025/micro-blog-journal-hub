@@ -17,10 +17,17 @@ app = FastAPI(
 app.include_router(user.router, prefix="/users", tags=["users"])
 app.include_router(journal.router, prefix="/journals", tags=["journals"])
 app.include_router(entry.router, prefix="/entries", tags=["entries"])
-app.include_router(auth.router)
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 # Root endpoint
-
 @app.get("/")
 def read_root():
     return {"message": "Welcome to RecollectionRealm API"}
