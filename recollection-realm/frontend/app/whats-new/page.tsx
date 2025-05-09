@@ -13,7 +13,6 @@ export default function WhatsNew() {
     {
       user: "Rhilo Sotto",
       text: "I explored the vibrant jungles of Costa Rica with breathtaking waterfalls, rare wildlife, and unforgettable hikes. Completing this Bucket List journey felt surreal. Next destination... the tranquil beaches of The Bahamas!",
-      bg: "bg-green-100 dark:bg-green-900",
       image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80",
       likes: 0,
       comments: [] as string[],
@@ -23,7 +22,6 @@ export default function WhatsNew() {
     {
       user: "John Guerrero",
       text: "A spontaneous weekend getaway turned into the best trip this year. Discovered hidden coves, tasted local cuisine, and embraced the calm. Thanks to this amazing new travel app!",
-      bg: "bg-blue-100 dark:bg-blue-900",
       image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
       likes: 0,
       comments: [],
@@ -33,7 +31,6 @@ export default function WhatsNew() {
     {
       user: "Maria Chen",
       text: "Months of persistence and training paid off—crossing that marathon finish line was a life-changing experience! Nothing beats the energy of the crowd and the pride of reaching your goal.",
-      bg: "bg-pink-100 dark:bg-pink-900",
       image: "https://images.pexels.com/photos/2402777/pexels-photo-2402777.jpeg",
       likes: 0,
       comments: [],
@@ -43,7 +40,6 @@ export default function WhatsNew() {
     {
       user: "Alex Rodriguez",
       text: "After countless trials, I finally perfected the soufflé. Fluffy, golden, and light as air—turns out, the secret really is in the egg whites. Cooking is truly an art form!",
-      bg: "bg-yellow-100 dark:bg-yellow-900",
       image: "https://images.pexels.com/photos/4252136/pexels-photo-4252136.jpeg",
       likes: 0,
       comments: [],
@@ -92,7 +88,10 @@ export default function WhatsNew() {
             </div>
             <div className="bg-[#D9D9D9] dark:bg-gray-800 border-t border-black dark:border-gray-700 p-4 space-y-4">
               {posts.map((post, idx) => (
-                <div key={idx} className={`p-3 rounded-md border border-black dark:border-gray-600 flex flex-col gap-2 ${post.bg} dark:text-gray-100`}>
+                <div 
+                  key={idx} 
+                  className={`p-3 rounded-md border border-black dark:border-gray-600 flex flex-col gap-2 bg-white dark:bg-gray-700 dark:text-gray-100`}
+                >
                   <div className="flex gap-4">
                     <div className="w-64 h-40 flex-shrink-0 border border-black dark:border-gray-600 rounded-md overflow-hidden">
                       <Image src={post.image} alt={`${post.user} image`} width={256} height={160} className="w-full h-full object-cover" />
@@ -122,7 +121,7 @@ export default function WhatsNew() {
                       <input 
                         name="comment" 
                         placeholder="Add a comment..." 
-                        className="flex-grow px-2 py-1 text-sm border border-gray-400 rounded 
+                        className="flex-grow px-2 py-1 text-sm border border-gray-400 rounded bg-gray-100 
                                    dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400" 
                       />
                       <button type="submit" className="text-sm text-green-700 hover:underline dark:text-green-400 dark:hover:text-green-300">Post</button>
