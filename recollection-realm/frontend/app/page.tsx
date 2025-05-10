@@ -1,16 +1,15 @@
-// Full interactive dashboard code with upgraded navigation, live posts, enhanced weather widget, editable checklist, calendar notes, dark mode fix
 'use client'
-import {
-  Calendar,
-  CheckSquare,
-  Send,
-  ThumbsUp,
-  CloudRain,
-  CloudSun
-} from 'lucide-react'
-import React, { useState } from 'react'
+import { Calendar, CheckSquare, Send, ThumbsUp, CloudRain, CloudSun, ChevronLeft, ChevronRight } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
 import { Header } from "@/components/header"
 import NavBar from "@/components/Navbar"
+
+interface CalendarCell {
+  day: number;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  date: Date; // Full date object
+}
 
 export default function Dashboard() {
   const [newPost, setNewPost] = useState('')
@@ -28,22 +27,79 @@ export default function Dashboard() {
     "Walk the dogs"
   ])
   const [checked, setChecked] = useState(Array(checklistItems.length).fill(false))
-  const [calendarNotes, setCalendarNotes] = useState<{ [key: number]: { text: string; emoji: string } | undefined }>({})
-  const [selectedDate, setSelectedDate] = useState<number | null>(null)
-  const [noteInput, setNoteInput] = useState('') // Used for both checklist and calendar note input
+  
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [calendarNotes, setCalendarNotes] = useState<{ [key: string]: { text: string; emoji: string } | undefined }>({})
+  
+  const [noteInput, setNoteInput] = useState('')
   const [sticker, setSticker] = useState('')
-  const [checklistInput, setChecklistInput] = useState('') // Separate state for checklist input
+  const [checklistInput, setChecklistInput] = useState('')
 
-  const currentDate = new Date()
+  const [currentDate, setCurrentDate] = useState(new Date()); 
+  const today = useMemo(() => new Date(), []); 
+
+  const getDateKey = (date: Date): string => date.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+  const isSameDate = (date1: Date | null, date2: Date): boolean => {
+    if (!date1) return false;
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  };
+
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-  const currentMonth = currentDate.toLocaleString("default", { month: "long" })
-  const currentYear = currentDate.getFullYear()
-  const daysInMonth = new Date(currentYear, currentDate.getMonth() + 1, 0).getDate()
-  const firstDayOfMonth = new Date(currentYear, currentDate.getMonth(), 1).getDay()
-  const calendarDays = Array.from({ length: 35 }, (_, i) => {
-    const day = i - firstDayOfMonth + 1
-    return day > 0 && day <= daysInMonth ? day : null
-  })
+  const displayMonth = currentDate.toLocaleString("default", { month: "long" })
+  const displayYear = currentDate.getFullYear()
+  
+  const calendarCells = useMemo(() => {
+    const cells: CalendarCell[] = [];
+    const numCellsInGrid = 35; // 5 weeks * 7 days, reverted from 42
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth(); // 0-indexed
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfMonthWeekday = new Date(year, month, 1).getDay(); // 0 (Sun) to 6 (Sat)
+
+    const prevMonthEndDate = new Date(year, month, 0);
+    const daysInPrevMonth = prevMonthEndDate.getDate();
+    
+    for (let i = 0; i < firstDayOfMonthWeekday; i++) {
+      const day = daysInPrevMonth - firstDayOfMonthWeekday + 1 + i;
+      cells.push({
+        day: day,
+        isCurrentMonth: false,
+        isToday: false,
+        date: new Date(year, month - 1, day)
+      });
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const cellDate = new Date(year, month, day);
+      const isTodayDate =
+        day === today.getDate() &&
+        month === today.getMonth() && 
+        year === today.getFullYear(); 
+      cells.push({
+        day: day,
+        isCurrentMonth: true,
+        isToday: isTodayDate,
+        date: cellDate
+      });
+    }
+
+    const remainingCells = numCellsInGrid - cells.length;
+    for (let i = 1; i <= remainingCells; i++) {
+      cells.push({
+        day: i,
+        isCurrentMonth: false,
+        isToday: false, 
+        date: new Date(year, month + 1, i)
+      });
+    }
+    return cells;
+  }, [currentDate, today]);
+
 
   const handleNewPost = () => {
     if (!newPost.trim()) return
@@ -53,7 +109,7 @@ export default function Dashboard() {
 
   const toggleLike = (index: number) => {
     const updated = [...recentPosts]
-    updated[index].likes = updated[index].likes === 0 ? 1 : 0 // Toggle like
+    updated[index].likes = updated[index].likes === 0 ? 1 : 0
     setRecentPosts(updated)
   }
 
@@ -76,25 +132,41 @@ export default function Dashboard() {
     setChecked(checked.filter((_, i) => i !== index))
   }
 
-  const handleDayClick = (day: number) => {
-    setSelectedDate(day)
-    setNoteInput(calendarNotes[day]?.text || '')
-    setSticker(calendarNotes[day]?.emoji || '')
-  }
+  const handleDayClick = (date: Date) => {
+    setSelectedDate(date);
+    const dateKey = getDateKey(date);
+    setNoteInput(calendarNotes[dateKey]?.text || '');
+    setSticker(calendarNotes[dateKey]?.emoji || '');
+  };
 
   const saveNote = () => {
-    if (selectedDate && (noteInput.trim() || sticker)) {
-      setCalendarNotes({ ...calendarNotes, [selectedDate]: { text: noteInput, emoji: sticker } })
-    } else if (selectedDate) { // If both are empty, clear the note
-        const newNotes = {...calendarNotes};
-        delete newNotes[selectedDate];
+    if (selectedDate) {
+      const dateKey = getDateKey(selectedDate);
+      if (noteInput.trim() || sticker) {
+        setCalendarNotes({ ...calendarNotes, [dateKey]: { text: noteInput, emoji: sticker } });
+      } else {
+        const newNotes = { ...calendarNotes };
+        delete newNotes[dateKey];
         setCalendarNotes(newNotes);
+      }
     }
-    // Optionally clear inputs after save, or leave them for further editing
-    // setSelectedDate(null); 
-    // setNoteInput('');
-    // setSticker('');
-  }
+  };
+
+  const goToPreviousMonth = () => {
+    setCurrentDate(prevDate => {
+      const newDate = new Date(prevDate);
+      newDate.setMonth(newDate.getMonth() - 1);
+      return newDate;
+    });
+  };
+
+  const goToNextMonth = () => {
+    setCurrentDate(prevDate => {
+      const newDate = new Date(prevDate);
+      newDate.setMonth(newDate.getMonth() + 1);
+      return newDate;
+    });
+  };
 
   const weatherData = [
     { day: "Mon", icon: <CloudSun className="text-yellow-400 animate-[pulse_3s_infinite]" />, temp: "74°F" },
@@ -109,26 +181,22 @@ export default function Dashboard() {
   return (
     <>
       <Header />
-      {/* Main page background and text color updated for consistency */}
       <main className="min-h-screen bg-[#F7F7F7] text-black dark:bg-slate-900 dark:text-slate-100">
         <NavBar />
 
         <div className="p-6 space-y-6">
-          {/* Top Row: Weather Widget, Checklist, Post Box */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {/* Weather Widget */}
             <div className="border border-black rounded-xl shadow overflow-hidden dark:border-gray-600">
-              {/* Header: Gradient for light, solid color for dark. Text color adapted. */}
-              <div className="bg-gradient-to-r from-yellow-200 to-yellow-400 dark:bg-yellow-700 px-4 py-2">
-                <h2 className="font-bold text-lg text-black dark:text-yellow-50">7-Day Forecast</h2>
+              <div className="bg-gradient-to-r from-blue-200 to-blue-400 dark:bg-blue-700 px-4 py-2">
+                <h2 className="font-bold text-lg text-black dark:text-blue-50">7-Day Forecast</h2>
               </div>
-              {/* Content area: Consistent dark background */}
               <div className="bg-white p-4 dark:bg-gray-800">
-                <div className="grid grid-cols-4 gap-4 text-center">
+                <div className="grid grid-cols-4 sm:grid-cols-7 gap-4 text-center">
                   {weatherData.map(({ day, icon, temp }, idx) => (
                     <div key={idx} className="flex flex-col items-center">
                       <div className="text-lg font-medium text-gray-800 dark:text-slate-200">{day}</div>
-                      <div className="my-1">{icon}</div> {/* Icons have their own colors */}
+                      <div className="my-1">{icon}</div>
                       <div className="text-sm text-gray-600 dark:text-slate-400">{temp}</div>
                     </div>
                   ))}
@@ -138,8 +206,8 @@ export default function Dashboard() {
 
             {/* Checklist */}
             <div className="border border-black rounded-xl shadow overflow-hidden dark:border-gray-600">
-              <div className="bg-gradient-to-r from-purple-200 to-purple-400 dark:bg-purple-700 px-4 py-2">
-                <h2 className="font-bold flex items-center gap-2 text-black dark:text-purple-50"><CheckSquare className="w-5 h-5" /> Checklist</h2>
+              <div className="bg-gradient-to-r from-blue-200 to-blue-400 dark:bg-blue-700 px-4 py-2">
+                <h2 className="font-bold flex items-center gap-2 text-black dark:text-blue-50"><CheckSquare className="w-5 h-5" /> Checklist</h2>
               </div>
               <div className="bg-white p-4 dark:bg-gray-800">
                 <ul className="space-y-2">
@@ -207,36 +275,73 @@ export default function Dashboard() {
 
           {/* Calendar */}
           <div className="border border-black rounded-xl shadow overflow-hidden dark:border-gray-600">
-            <div className="bg-gradient-to-r from-green-200 to-green-400 dark:bg-green-700 px-4 py-2">
-              <h2 className="font-bold flex items-center gap-2 text-black dark:text-green-50"><Calendar className="w-5 h-5" /> Calendar</h2>
+            <div className="bg-gradient-to-r from-blue-200 to-blue-400 dark:bg-blue-700 px-4 py-2 flex justify-between items-center">
+              <button 
+                onClick={goToPreviousMonth} 
+                className="p-1 rounded-md hover:bg-blue-500/30 dark:hover:bg-blue-600/50 text-black dark:text-blue-50"
+                aria-label="Previous month"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <h2 className="font-bold flex items-center gap-2 text-black dark:text-blue-50">
+                <Calendar className="w-5 h-5" /> {displayMonth} {displayYear}
+              </h2>
+              <button 
+                onClick={goToNextMonth} 
+                className="p-1 rounded-md hover:bg-blue-500/30 dark:hover:bg-blue-600/50 text-black dark:text-blue-50"
+                aria-label="Next month"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
             <div className="bg-white p-4 dark:bg-gray-800">
               <div className="grid grid-cols-7 text-center font-semibold border-b border-gray-300 dark:border-gray-700">
                 {weekdays.map(day => <div key={day} className="py-1 text-gray-700 dark:text-slate-300">{day}</div>)}
               </div>
               <div className="grid grid-cols-7">
-                {calendarDays.map((day, index) => (
-                  <div
-                    key={index}
-                    className={`h-20 border border-gray-200 dark:border-gray-700 p-1 relative cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-500/20 ${selectedDate === day ? 'bg-purple-200 dark:bg-purple-600/30' : 'bg-white dark:bg-gray-800'}`}
-                    onClick={() => day && handleDayClick(day)}
-                  >
-                    {day && (
-                      <>
-                        <div className={`font-bold text-sm ${currentDate.getDate() === day && currentDate.getMonth() === new Date().getMonth() ? 'text-blue-600 dark:text-blue-400' : 'text-gray-800 dark:text-slate-200'}`}>{day}</div>
-                        {calendarNotes[day] && (
-                          <div className="text-xs mt-1 text-gray-600 dark:text-slate-300">
-                            {calendarNotes[day]?.emoji} {calendarNotes[day]?.text.substring(0, 10)}{calendarNotes[day]?.text.length > 10 ? '...' : ''}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
+                {calendarCells.map((cell, index) => {
+                  const cellDateKey = getDateKey(cell.date);
+                  let cellBaseClasses = 'h-20 border border-gray-200 dark:border-gray-700 p-1 relative cursor-pointer';
+                  let cellBgClasses = '';
+
+                  if (isSameDate(selectedDate, cell.date)) {
+                    cellBgClasses = 'bg-purple-200 dark:bg-purple-600/30';
+                  } else if (cell.isCurrentMonth) {
+                    cellBgClasses = 'bg-white dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-500/20';
+                  } else { 
+                    cellBgClasses = 'bg-gray-50 dark:bg-gray-700/50 hover:bg-purple-100 dark:hover:bg-purple-500/20';
+                  }
+
+                  return (
+                    <div
+                      key={`${cell.date.toISOString()}-${index}`} 
+                      className={`${cellBaseClasses} ${cellBgClasses}`}
+                      onClick={() => handleDayClick(cell.date)} 
+                    >
+                      <div className={`font-bold text-sm 
+                        ${cell.isToday 
+                          ? 'text-blue-600 dark:text-blue-400 rounded-full bg-blue-100 dark:bg-blue-500/30 w-6 h-6 flex items-center justify-center' 
+                          : cell.isCurrentMonth 
+                            ? 'text-gray-800 dark:text-slate-200' 
+                            : 'text-gray-400 dark:text-gray-500'
+                        }
+                      `}>
+                        {cell.day}
+                      </div>
+                      {calendarNotes[cellDateKey] && (
+                        <div className="text-xs mt-1 text-gray-600 dark:text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">
+                          {calendarNotes[cellDateKey]?.emoji} {calendarNotes[cellDateKey]?.text}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
               {selectedDate && (
                 <div className="mt-4 border-t border-gray-300 dark:border-gray-700 pt-4">
-                  <h3 className="font-semibold mb-2 text-gray-800 dark:text-slate-100">Note for {currentMonth} {selectedDate}, {currentYear}</h3>
+                  <h3 className="font-semibold mb-2 text-gray-800 dark:text-slate-100">
+                    Note for {selectedDate.toLocaleString("default", { month: "long" })} {selectedDate.getDate()}, {selectedDate.getFullYear()}
+                  </h3>
                   <div className="flex flex-col sm:flex-row gap-2 mb-2">
                     <input
                       placeholder="Your note..."
