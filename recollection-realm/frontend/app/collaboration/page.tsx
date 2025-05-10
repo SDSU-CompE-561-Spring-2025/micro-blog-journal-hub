@@ -1,4 +1,4 @@
-"use client"; // Required for Next.js App Router with client-side hooks
+"use client";
 
 import { Header } from "@/components/header";
 import NavBar from "@/components/Navbar";

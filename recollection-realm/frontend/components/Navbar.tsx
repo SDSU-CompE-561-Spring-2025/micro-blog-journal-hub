@@ -16,12 +16,18 @@ export default function NavBar() {
   const pathname = usePathname()
 
   return (
-    <nav className="w-full px-4 py-2 bg-gradient-to-r from-purple-200 to-blue-300
-                   dark:from-slate-700 dark:to-slate-800
-                   border-y border-black dark:border-gray-600
-                   text-sm font-medium">
-
-      <div className={`max-w-[1400px] mx-auto grid grid-cols-${navItems.length}`}>
+    <nav
+      className="
+        w-full px-4 py-2
+        bg-gradient-to-r from-purple-200 to-blue-300
+        dark:from-slate-700 dark:to-slate-800
+        border-y border-black dark:border-gray-600
+        text-sm font-medium
+      "
+    >
+      <div
+        className={`max-w-[1400px] mx-auto grid grid-cols-6 ${navItems.length}`}
+      >
         {navItems.map(item => (
           <Link
             key={item.href}
