@@ -1,20 +1,24 @@
-# Use Python base image
+# backend/Dockerfile
 FROM python:3.11-slim
 
-# Set working directory
+# Set working directory inside container
 WORKDIR /app
 
-# Install Hatch
-RUN pip install --no-cache-dir hatch
+# Install netcat (nc) to wait for db
+RUN apt-get update && apt-get install -y netcat-openbsd && apt-get clean
 
-# Copy project files
-COPY backend .
+# Copy requirements and install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install dependencies using Hatch
-RUN hatch env create
+# Copy env and code
+COPY . .
+
+# Make sure the script is executable inside container
+RUN chmod +x start.sh
 
 # Expose FastAPI port
 EXPOSE 8000
 
-# Run FastAPI with Uvicorn
-CMD ["hatch", "run", "api:uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Start the FastAPI app with Uvicorn
+CMD ["./start.sh"]

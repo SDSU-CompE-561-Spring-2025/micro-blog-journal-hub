@@ -1,9 +1,10 @@
-#ignore this file
+# ignore this file
 
 
 from pydantic import BaseModel, EmailStr
-from datetime import datetime 
-from typing import Optional 
+from datetime import datetime
+from typing import Optional
+
 
 class UserBase(BaseModel):
     id: int
@@ -13,35 +14,44 @@ class UserBase(BaseModel):
     creation_date: datetime
     inheritor: Optional[int]
 
+
 class UserCreate(BaseModel):
-    id: int
     name: str
     email: EmailStr
     password: str
-    creation_date: datetime
-    inheritor: Optional[int]
+    inheritor: Optional[int] = None
 
-class JournalBase(BaseModel):       #foreign key somewhere
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    inheritor: Optional[int] = None
+
+
+class JournalBase(BaseModel):  # foreign key somewhere
     id: int
     title: str
     keywords: Optional[str]
     creation_date: datetime
-    #password?
-    #other fields?
+    # password?
+    # other fields?
+
 
 class JournalCreate(BaseModel):
-    id: int
     title: str
-    creation_date: datetime
     privacy: int
     password: str
+    keywords: Optional[str] = None
+
 
 class JournalRead(BaseModel):
     title: str
     keywords: Optional[str]
     creation_date: datetime
 
-class EntryBase(BaseModel):         #foreign key somewhere
+
+class EntryBase(BaseModel):  # foreign key somewhere
     id: int
     title: str
     creation_date: datetime
@@ -49,20 +59,16 @@ class EntryBase(BaseModel):         #foreign key somewhere
     comment: str
     password: str
 
+
 class EntryCreate(BaseModel):
-    id: int
     title: str
     privacy: int
     password: str
-    creation_date: datetime
+    keywords: Optional[str] = None
+    comment: Optional[str] = None  # only if used in DB
+
 
 class EntryRead(BaseModel):
     title: str
     keywords: Optional[str]
     creation_date: datetime
-
-
-
-
-
-

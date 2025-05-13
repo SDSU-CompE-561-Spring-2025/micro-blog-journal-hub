@@ -19,14 +19,21 @@ journal_inheritors = Table(
     Column("user_id", Integer, ForeignKey("users.id"), primary_key=True)
 )
 
+
 class Journal(Base):
     __tablename__ = "journals"
-    id = Column(Integer, primary_key=True, index = True)
+    id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    privacy = Column(Integer, default = 0) ## 0 for private, 1 for share with and 2 for public
+    # 0 for private, 1 for share with and 2 for public
+    privacy = Column(Integer, default=0)
     password = Column(String, nullable=True)
     tags = Column(String, nullable=True)
     categories = Column(String, nullable=True)
     creation_date = Column(DateTime, default=datetime.utcnow)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    owner = relationship("User", back_populates="journals")
+    entries = relationship("Entry", back_populates="journal")
+    inherited_by = relationship("User", secondary="journal_inheritors")
+#   collaborators = relationship("User", secondary=journal_collaborators)

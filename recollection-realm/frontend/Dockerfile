@@ -5,11 +5,11 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files and install dependencies
-COPY frontend/package*.json ./
-RUN npm install
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
 
 # Copy rest of the app
-COPY frontend .
+COPY . .
 
 # Build the Next.js app
 RUN npm run build
@@ -18,4 +18,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Start the app
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npm run build && npm start"]

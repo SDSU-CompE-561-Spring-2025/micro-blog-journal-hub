@@ -1,56 +1,53 @@
-from fastapi import APIRouter, HTTPException, Request, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.schemas.user import UserCreate
-from app.utils.utils import get_password_hash
 from app.database import get_db
-from app.models.user import User  # <-- Add this
-
+from app.models.user import User
+from app.utils.utils import get_password_hash, verify_password
 
 router = APIRouter()
 
-users_db = {}  # temporary mock DB
-
-
-class UserCreate(BaseModel):
-    username: str
-    password: str
-    email: str
+# Request body schema for login
 
 
 class AuthData(BaseModel):
-    username: str
+    username: str  # user enters email as 'username'
     password: str
 
-
-@router.post("/login")
-def login(data: AuthData):
-    user = users_db.get(data.username)
-    if not user or user["password"] != data.password:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    return {"message": "Login successful", "username": data.username}
+# REGISTER ROUTE
 
 
 @router.post("/register")
-# def register(data: AuthData):
-#    if data.username in users_db:
-#        raise HTTPException(status_code=400, detail="User already exists")
-#    users_db[data.username] = {"username": data.username, "password": data.password}
-#    return {"message": "Registration successful", "username": data.username}
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(
-        User.username == user.username).first()
+    existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
-        raise HTTPException(
-            status_code=409, detail="Username already registered")
+        raise HTTPException(status_code=409, detail="Email already registered")
 
     hashed_password = get_password_hash(user.password)
-    new_user = User(username=user.username, password=hashed_password)
+
+    new_user = User(
+        name=user.name,
+        email=user.email,
+        password=hashed_password,
+       # inheritor_id=user.inheritor_id
+        #creation_date=user.creation_date 
+    )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "User registered successfully"}
+    return {"message": "User registered successfully", "user_id": new_user.id}
+
+# LOGIN ROUTE
+
+
+@router.post("/login")
+def login(auth_data: AuthData, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == auth_data.username).first()
+    if not user or not verify_password(auth_data.password, user.password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    return {"message": "Login successful", "user_id": user.id}
