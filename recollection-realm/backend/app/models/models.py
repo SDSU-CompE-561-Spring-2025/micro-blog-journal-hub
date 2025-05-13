@@ -1,10 +1,8 @@
-#ignore this file
-
-
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from app.database import Base          #revise
+from app.database import Base
 from datetime import datetime
+
 
 class User(Base):
     __tablename__ = "users"
@@ -14,10 +12,11 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     inheritor = Column(Integer, unique=True, nullable=True)
-    creation_date = Column(DateTime, deafault=datetime.utcnow)
+    creation_date = Column(DateTime, default=datetime.utcnow)
 
-    journals = relationship("Journal", back_populates="users")
-    entries = relationship("Entry", back_populates="users")
+    journals = relationship("Journal", back_populates="owner")
+    entries = relationship("Entry", back_populates="author")
+
 
 class Journal(Base):
     __tablename__ = "journals"
@@ -29,8 +28,10 @@ class Journal(Base):
     keywords = Column(String, nullable=True)
     creation_date = Column(DateTime, default=datetime.utcnow)
 
-    users = relationship("User", back_populates="journals")
-    entries = relationship("Entry", back_populates="journals")
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner = relationship("User", back_populates="journals")
+    entries = relationship("Entry", back_populates="journal")
+
 
 class Entry(Base):
     __tablename__ = "entries"
@@ -42,5 +43,8 @@ class Entry(Base):
     keywords = Column(String, nullable=True)
     creation_date = Column(DateTime, default=datetime.utcnow)
 
-    users = relationship("User", back_populates="journals")
-    journals = relationship("Entry", back_populates="journals")
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    journal_id = Column(Integer, ForeignKey("journals.id"), nullable=False)
+
+    author = relationship("User", back_populates="entries")
+    journal = relationship("Journal", back_populates="entries")

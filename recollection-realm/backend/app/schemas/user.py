@@ -10,8 +10,11 @@ class UserBase(BaseModel):
     bio: Optional[str] = None  # Short personal bio
 
 
-class UserCreate(UserBase):
-    password: str  # Plaintext password (will be hashed)
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    inheritor: Optional[int] = None
 
 
 class UserUpdate(BaseModel):
@@ -24,6 +27,15 @@ class UserUpdate(BaseModel):
 class User(UserBase):
     id: int  # Auto-incrementing primary key
     creation_date: datetime  # Date the user registered
+
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    full_name: Optional[str] = None
+    bio: Optional[str] = None
+    creation_date: datetime
 
     class Config:
         orm_mode = True  # Needed to convert SQLAlchemy objects to Pydantic
