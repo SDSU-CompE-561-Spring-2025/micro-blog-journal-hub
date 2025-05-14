@@ -21,7 +21,7 @@ export default function NavBar() {
                    border-y border-black dark:border-gray-600
                    text-sm font-medium">
 
-      <div className={`max-w-[1400px] mx-auto grid grid-cols-${navItems.length}`}>
+<div className="max-w-[1400px] mx-auto flex justify-between">
         {navItems.map(item => (
           <Link
             key={item.href}
