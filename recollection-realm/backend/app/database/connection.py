@@ -7,9 +7,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env
 load_dotenv()
 
-
-# Use DATABASE_URL from the .env
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+# Use DATABASE_URL from the .env or fallback to local PostgreSQL
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
