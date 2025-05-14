@@ -12,22 +12,24 @@ import { useState, useEffect, FormEvent } from "react";
 // Define the base URL for your API
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-// Frontend interface matching backend's EntryOut schema
+// Frontend interface matching backend's schema
 interface Entry {
   id: number;
-  title: string;
-  content: string;
+  text: string;  // Changed from content to text
   user_id: number;
+  username: string;
+  image_url: string;
+  genre: string;
+  likes: number;
+  created_at: string;
+  comments: any[];
 }
 
 // Helper to get auth token
 const getAuthToken = (): string | null => {
   if (typeof window !== "undefined") {
-    // Consistent with header.tsx, assuming token key is "token"
-    // If your auth system uses "authToken", revert this change.
-    // For this exercise, I'm assuming "token" based on header.tsx for login check.
-    // However, the original page.tsx used "authToken", so let's stick to that to avoid breaking existing logic.
-    return localStorage.getItem("authToken");
+    // Check for both token keys for backward compatibility
+    return localStorage.getItem("token") || localStorage.getItem("authToken");
   }
   return null;
 };
@@ -51,7 +53,7 @@ export default function CollaborationPage() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/entries/`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -89,16 +91,16 @@ export default function CollaborationPage() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/entries/`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title: newEntryTitle, content: newEntryContent }),
+        body: JSON.stringify({ text: newEntryContent }), // Changed from content to text
       });
       if (!response.ok) {
-         if (response.status === 401 || response.status === 403) {
+        if (response.status === 401 || response.status === 403) {
           throw new Error("Unauthorized or Access Denied creating entry.");
         }
         const errorData = await response.json();
@@ -126,7 +128,7 @@ export default function CollaborationPage() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/entries/${entryId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/posts/${entryId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -156,55 +158,75 @@ export default function CollaborationPage() {
     <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900">
       <Header />
       <NavBar />
-      
-      <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
-        {/* Main heading: Brighter text for dark mode */}
-        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-slate-100">Collaboration</h1>
 
-        {/* Error Message: Dark mode styling */}
+      <main className="flex-1 p-4 max-w-5xl mx-auto w-full">
+        <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-slate-100 text-center">Collaboration</h1>
+
         {error && (
-          <p className="text-red-600 bg-red-100 p-3 rounded mb-4 dark:text-red-400 dark:bg-red-900/30">
+          <p className="text-red-600 bg-red-100 p-3 rounded-lg mb-4 dark:text-red-400 dark:bg-red-900/30 text-center">
             {error}
           </p>
         )}
 
-        {/* Main content card: Dark mode background */}
-        <Card className="bg-gray-200 p-4 mb-6 dark:bg-slate-800">
+        <Card className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 mb-6 dark:from-slate-800 dark:to-slate-700 shadow-lg rounded-xl">
           <CardContent className="p-0">
             {/* Static content section */}
-            <div className="bg-blue-100 rounded-xl p-6 mb-6 dark:bg-slate-700">
-              <h3 className="text-xl mb-4 text-gray-800 dark:text-slate-200">Which Journal are we working on today!</h3>
-              <div className="grid md:grid-cols-2 gap-4 text-gray-700 dark:text-slate-300">
-                <ul className="list-disc pl-6 space-y-1">
-                  <li>Sunny San Diego</li>
-                  <li>Visit to the beach</li>
-                  <li>Friends in Cornado</li>
+            <div className="bg-white/80 rounded-xl p-6 mb-6 dark:bg-slate-700/50 shadow-inner">
+              <h3 className="text-2xl mb-4 text-gray-800 dark:text-slate-200 font-semibold">Which Journal are we working on today!</h3>
+              <div className="grid md:grid-cols-2 gap-6 text-gray-700 dark:text-slate-300">
+                <ul className="list-none space-y-2">
+                  <li className="flex items-center space-x-2 hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                    <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+                    <span>Sunny San Diego</span>
+                  </li>
+                  <li className="flex items-center space-x-2 hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                    <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+                    <span>Visit to the beach</span>
+                  </li>
+                  <li className="flex items-center space-x-2 hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                    <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+                    <span>Friends in Cornado</span>
+                  </li>
                 </ul>
-                <ul className="list-disc pl-6 space-y-1">
-                  <li>Cars & Coffee</li>
-                  <li>Code 101</li>
-                  <li>Thoughts I think of</li>
+                <ul className="list-none space-y-2">
+                  <li className="flex items-center space-x-2 hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                    <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+                    <span>Cars & Coffee</span>
+                  </li>
+                  <li className="flex items-center space-x-2 hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                    <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+                    <span>Code 101</span>
+                  </li>
+                  <li className="flex items-center space-x-2 hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+                    <span className="h-2 w-2 rounded-full bg-purple-500"></span>
+                    <span>Thoughts I think of</span>
+                  </li>
                 </ul>
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Add Friends Card */}
-              <Card className="bg-blue-100 p-4 dark:bg-slate-700">
+              <Card className="bg-white/80 p-6 dark:bg-slate-700/50 shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className="text-xl text-gray-800 dark:text-slate-200">Add friends:</CardTitle>
+                  <CardTitle className="text-xl text-gray-800 dark:text-slate-200">Add friends</CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 text-gray-700 dark:text-slate-300">
-                  <ul className="list-disc pl-6 space-y-1">
-                    <li>Friend 1</li>
-                    <li>Friend 2</li>
-                    <li>Friend 3</li>
-                  </ul>
+                <CardContent className="p-0">
+                  <div className="space-y-2">
+                    {["Friend 1", "Friend 2", "Friend 3"].map((friend, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600/50 transition-colors">
+                        <span className="text-gray-700 dark:text-slate-300">{friend}</span>
+                        <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Entry Creation Card */}
-              <Card className="bg-blue-100 p-4 dark:bg-slate-700">
+              <Card className="bg-white/80 p-6 dark:bg-slate-700/50 shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="p-0 pb-4">
                   <CardTitle className="text-xl text-gray-800 dark:text-slate-200">Create New Entry</CardTitle>
                 </CardHeader>
@@ -220,8 +242,7 @@ export default function CollaborationPage() {
                         placeholder="Entry title"
                         value={newEntryTitle}
                         onChange={(e) => setNewEntryTitle(e.target.value)}
-                        // Consistent input styling with header
-                        className="bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:placeholder-gray-400 focus:ring-2 focus:ring-[#8F41D3] dark:focus:ring-violet-500"
+                        className="bg-white/50 text-gray-700 dark:bg-slate-600/50 dark:text-gray-300 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 border-gray-200 dark:border-slate-600"
                         required
                       />
                     </div>
@@ -234,13 +255,15 @@ export default function CollaborationPage() {
                         placeholder="Type your journal entry here...."
                         value={newEntryContent}
                         onChange={(e) => setNewEntryContent(e.target.value)}
-                        // Consistent textarea styling
-                        className="h-32 bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-300 dark:placeholder-gray-400 focus:ring-2 focus:ring-[#8F41D3] dark:focus:ring-violet-500"
+                        className="h-32 bg-white/50 text-gray-700 dark:bg-slate-600/50 dark:text-gray-300 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 border-gray-200 dark:border-slate-600 resize-none"
                         required
                       />
                     </div>
-                    {/* Button should adapt via its own UI component styles, but can be overridden */}
-                    <Button type="submit" disabled={isLoading} className="w-full bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700">
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                    >
                       {isLoading ? "Saving..." : "Save Entry"}
                     </Button>
                   </form>
@@ -248,23 +271,27 @@ export default function CollaborationPage() {
               </Card>
 
               {/* Archive Card */}
-              <Card className="bg-blue-100 p-4 dark:bg-slate-700">
+              <Card className="bg-white/80 p-6 dark:bg-slate-700/50 shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="p-0 pb-4">
                   <CardTitle className="text-xl text-gray-800 dark:text-slate-200">Archive</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {isLoading && entries.length === 0 && <p className="text-gray-600 dark:text-slate-400">Loading entries...</p>}
-                  {!isLoading && !error && entries.length === 0 && <p className="text-gray-600 dark:text-slate-400">No entries found. Create one!</p>}
+                  {isLoading && entries.length === 0 && (
+                    <p className="text-gray-600 dark:text-slate-400 text-center py-4">Loading entries...</p>
+                  )}
+                  {!isLoading && !error && entries.length === 0 && (
+                    <p className="text-gray-600 dark:text-slate-400 text-center py-4">No entries found. Create one!</p>
+                  )}
                   {entries.length > 0 && (
-                    <ul className="space-y-3">
+                    <ul className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                       {entries.map((entry) => (
-                        <li key={entry.id} className="p-3 bg-white rounded-md shadow dark:bg-slate-600">
+                        <li key={entry.id} className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow dark:bg-slate-600 border border-gray-100 dark:border-slate-500">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h4 className="font-semibold text-lg text-gray-800 dark:text-slate-100">{entry.title}</h4>
+                              <h4 className="font-semibold text-lg text-gray-800 dark:text-slate-100">{entry.username}</h4>
                               <p className="text-sm text-gray-600 dark:text-slate-400 whitespace-pre-wrap">
-                                {entry.content.substring(0, 100)}
-                                {entry.content.length > 100 && "..."}
+                                {entry.text?.substring(0, 100) || ''}
+                                {entry.text && entry.text.length > 100 && "..."}
                               </p>
                             </div>
                             <Button
@@ -273,9 +300,9 @@ export default function CollaborationPage() {
                               onClick={() => handleDeleteEntry(entry.id)}
                               disabled={isLoading}
                               aria-label="Delete entry"
-                              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500" // Explicit color for icon container
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
                             >
-                              <Trash2 className="h-4 w-4" /> {/* Icon inherits color from button text color */}
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </li>
@@ -286,13 +313,13 @@ export default function CollaborationPage() {
               </Card>
 
               {/* Journals Card */}
-              <Card className="bg-blue-100 p-4 dark:bg-slate-700">
+              <Card className="bg-white/80 p-6 dark:bg-slate-700/50 shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="p-0 pb-4">
                   <CardTitle className="text-xl text-gray-800 dark:text-slate-200">Journals</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 flex justify-center items-center h-40">
-                  <div className="h-24 w-24 rounded-full border-2 border-black dark:border-slate-500 flex items-center justify-center">
-                    <Plus className="h-12 w-12 text-black dark:text-slate-300" />
+                  <div className="h-24 w-24 rounded-full border-2 border-purple-500 dark:border-purple-400 flex items-center justify-center hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors cursor-pointer group">
+                    <Plus className="h-12 w-12 text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-transform" />
                   </div>
                 </CardContent>
               </Card>
