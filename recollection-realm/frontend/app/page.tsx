@@ -1,6 +1,6 @@
 'use client'
 import { Calendar, CheckSquare, Send, ThumbsUp, CloudRain, CloudSun, ChevronLeft, ChevronRight } from 'lucide-react'
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Header } from "@/components/header"
 import NavBar from "@/components/Navbar"
 
@@ -27,30 +27,36 @@ export default function Dashboard() {
     "Walk the dogs"
   ])
   const [checked, setChecked] = useState(Array(checklistItems.length).fill(false))
-  
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [calendarNotes, setCalendarNotes] = useState<{ [key: string]: { text: string; emoji: string } | undefined }>({})
-  
+
   const [noteInput, setNoteInput] = useState('')
   const [sticker, setSticker] = useState('')
   const [checklistInput, setChecklistInput] = useState('')
 
-  const [currentDate, setCurrentDate] = useState(new Date()); 
-  const today = useMemo(() => new Date(), []); 
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const today = useMemo(() => new Date(), []);
+
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const getDateKey = (date: Date): string => date.toISOString().split('T')[0]; // YYYY-MM-DD format
 
   const isSameDate = (date1: Date | null, date2: Date): boolean => {
     if (!date1) return false;
     return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate();
   };
 
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
   const displayMonth = currentDate.toLocaleString("default", { month: "long" })
   const displayYear = currentDate.getFullYear()
-  
+
   const calendarCells = useMemo(() => {
     const cells: CalendarCell[] = [];
     const numCellsInGrid = 35; // 5 weeks * 7 days, reverted from 42
@@ -63,7 +69,7 @@ export default function Dashboard() {
 
     const prevMonthEndDate = new Date(year, month, 0);
     const daysInPrevMonth = prevMonthEndDate.getDate();
-    
+
     for (let i = 0; i < firstDayOfMonthWeekday; i++) {
       const day = daysInPrevMonth - firstDayOfMonthWeekday + 1 + i;
       cells.push({
@@ -78,8 +84,8 @@ export default function Dashboard() {
       const cellDate = new Date(year, month, day);
       const isTodayDate =
         day === today.getDate() &&
-        month === today.getMonth() && 
-        year === today.getFullYear(); 
+        month === today.getMonth() &&
+        year === today.getFullYear();
       cells.push({
         day: day,
         isCurrentMonth: true,
@@ -93,7 +99,7 @@ export default function Dashboard() {
       cells.push({
         day: i,
         isCurrentMonth: false,
-        isToday: false, 
+        isToday: false,
         date: new Date(year, month + 1, i)
       });
     }
@@ -178,12 +184,58 @@ export default function Dashboard() {
     { day: "Sun", icon: <CloudSun className="text-yellow-400 animate-[pulse_3s_infinite]" />, temp: "77°F" }
   ]
 
+  const getDateCellClasses = (cell: CalendarCell) => {
+    const baseClasses = 'h-20 border border-gray-200 dark:border-gray-700 p-1 relative cursor-pointer'
+    let bgClasses = ''
+    let textClasses = ''
+
+    if (!mounted) {
+      return `${baseClasses} bg-white dark:bg-gray-800`
+    }
+
+    // Background classes
+    if (isSameDate(selectedDate, cell.date)) {
+      bgClasses = 'bg-purple-200 dark:bg-purple-600/30'
+    } else if (cell.isCurrentMonth) {
+      bgClasses = 'bg-white dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-500/20'
+    } else {
+      bgClasses = 'bg-gray-50 dark:bg-gray-700/50 hover:bg-purple-100 dark:hover:bg-purple-500/20'
+    }
+
+    // Text classes for the date number
+    if (cell.isToday) {
+      textClasses = 'text-blue-600 dark:text-blue-400 rounded-full bg-blue-100 dark:bg-blue-500/30 w-6 h-6 flex items-center justify-center'
+    } else if (cell.isCurrentMonth) {
+      textClasses = 'text-gray-800 dark:text-slate-200'
+    } else {
+      textClasses = 'text-gray-400 dark:text-gray-500'
+    }
+
+    return {
+      cell: `${baseClasses} ${bgClasses}`,
+      date: `font-bold text-sm ${textClasses}`
+    }
+  }
+
+  if (!mounted) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen bg-[#F7F7F7] text-black dark:bg-slate-900 dark:text-slate-100">
+          <NavBar />
+          <div className="p-6 space-y-6">
+            <div>Loading...</div>
+          </div>
+        </main>
+      </>
+    )
+  }
+
   return (
     <>
       <Header />
       <main className="min-h-screen bg-[#F7F7F7] text-black dark:bg-slate-900 dark:text-slate-100">
         <NavBar />
-
         <div className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {/* Weather Widget */}
@@ -214,8 +266,8 @@ export default function Dashboard() {
                   {checklistItems.map((item, i) => (
                     <li key={i} className="flex items-center justify-between text-gray-800 dark:text-slate-200">
                       <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={checked[i]} onChange={() => toggleChecklist(i)} 
-                               className="form-checkbox text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                        <input type="checkbox" checked={checked[i]} onChange={() => toggleChecklist(i)}
+                          className="form-checkbox text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                         <span className={checked[i] ? "line-through text-gray-500 dark:text-gray-400" : ""}>{item}</span>
                       </div>
                       <button onClick={() => removeChecklistItem(i)} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500">✖</button>
@@ -229,8 +281,8 @@ export default function Dashboard() {
                     placeholder="New task..."
                     className="flex-grow border border-gray-300 rounded px-2 py-1 text-sm bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-purple-500 focus:border-purple-500"
                   />
-                  <button 
-                    onClick={addChecklistItem} 
+                  <button
+                    onClick={addChecklistItem}
                     className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-500 text-sm"
                   >Add</button>
                 </div>
@@ -250,8 +302,8 @@ export default function Dashboard() {
                     placeholder="What's on your mind?"
                     className="flex-grow px-2 py-1 border border-gray-300 rounded bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-400 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <button 
-                    onClick={handleNewPost} 
+                  <button
+                    onClick={handleNewPost}
                     className="text-sm bg-[#3A6BC5] text-white px-3 py-1 rounded flex items-center gap-1 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
                   ><Send className="w-4 h-4" /> Post</button>
                 </div>
@@ -276,8 +328,8 @@ export default function Dashboard() {
           {/* Calendar */}
           <div className="border border-black rounded-xl shadow overflow-hidden dark:border-gray-600">
             <div className="bg-gradient-to-r from-blue-200 to-blue-400 dark:bg-blue-700 px-4 py-2 flex justify-between items-center">
-              <button 
-                onClick={goToPreviousMonth} 
+              <button
+                onClick={goToPreviousMonth}
                 className="p-1 rounded-md hover:bg-blue-500/30 dark:hover:bg-blue-600/50 text-black dark:text-blue-50"
                 aria-label="Previous month"
               >
@@ -286,8 +338,8 @@ export default function Dashboard() {
               <h2 className="font-bold flex items-center gap-2 text-black dark:text-blue-50">
                 <Calendar className="w-5 h-5" /> {displayMonth} {displayYear}
               </h2>
-              <button 
-                onClick={goToNextMonth} 
+              <button
+                onClick={goToNextMonth}
                 className="p-1 rounded-md hover:bg-blue-500/30 dark:hover:bg-blue-600/50 text-black dark:text-blue-50"
                 aria-label="Next month"
               >
@@ -300,32 +352,16 @@ export default function Dashboard() {
               </div>
               <div className="grid grid-cols-7">
                 {calendarCells.map((cell, index) => {
-                  const cellDateKey = getDateKey(cell.date);
-                  let cellBaseClasses = 'h-20 border border-gray-200 dark:border-gray-700 p-1 relative cursor-pointer';
-                  let cellBgClasses = '';
-
-                  if (isSameDate(selectedDate, cell.date)) {
-                    cellBgClasses = 'bg-purple-200 dark:bg-purple-600/30';
-                  } else if (cell.isCurrentMonth) {
-                    cellBgClasses = 'bg-white dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-500/20';
-                  } else { 
-                    cellBgClasses = 'bg-gray-50 dark:bg-gray-700/50 hover:bg-purple-100 dark:hover:bg-purple-500/20';
-                  }
+                  const cellDateKey = getDateKey(cell.date)
+                  const classes = getDateCellClasses(cell)
 
                   return (
                     <div
-                      key={`${cell.date.toISOString()}-${index}`} 
-                      className={`${cellBaseClasses} ${cellBgClasses}`}
-                      onClick={() => handleDayClick(cell.date)} 
+                      key={`${cell.date.toISOString()}-${index}`}
+                      className={classes.cell}
+                      onClick={() => handleDayClick(cell.date)}
                     >
-                      <div className={`font-bold text-sm 
-                        ${cell.isToday 
-                          ? 'text-blue-600 dark:text-blue-400 rounded-full bg-blue-100 dark:bg-blue-500/30 w-6 h-6 flex items-center justify-center' 
-                          : cell.isCurrentMonth 
-                            ? 'text-gray-800 dark:text-slate-200' 
-                            : 'text-gray-400 dark:text-gray-500'
-                        }
-                      `}>
+                      <div className={classes.date}>
                         {cell.day}
                       </div>
                       {calendarNotes[cellDateKey] && (
@@ -334,7 +370,7 @@ export default function Dashboard() {
                         </div>
                       )}
                     </div>
-                  );
+                  )
                 })}
               </div>
               {selectedDate && (
@@ -357,9 +393,9 @@ export default function Dashboard() {
                       <option value="🎂">🎂 Birthday</option>
                       <option value="✈️">✈️ Travel</option>
                     </select>
-                    <button 
-                        onClick={saveNote} 
-                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 text-sm"
+                    <button
+                      onClick={saveNote}
+                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 text-sm"
                     >Save</button>
                   </div>
                 </div>

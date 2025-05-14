@@ -29,8 +29,10 @@ export function LoginForm() {
         return
       }
 
-      // Save token and redirect
+      // Save token and complete user information
       localStorage.setItem("token", data.access_token)
+      localStorage.setItem("user", JSON.stringify(data.user))
+
       window.location.href = "/"
     } catch (err) {
       setError("Login failed. Please try again.")

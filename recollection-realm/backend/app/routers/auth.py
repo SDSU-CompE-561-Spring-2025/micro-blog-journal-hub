@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from datetime import timedelta
 
 from app.schemas.user import UserCreate
 from app.database import get_db
 from app.models.user import User
-from app.utils.utils import get_password_hash, verify_password
+from app.utils.utils import get_password_hash, verify_password, create_access_token
 
 router = APIRouter()
 
@@ -39,7 +40,23 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "User registered successfully", "user_id": new_user.id}
+    # Generate access token
+    access_token = create_access_token(
+        data={"sub": str(new_user.id)},
+        expires_delta=timedelta(minutes=30)
+    )
+
+    return {
+        "message": "User registered successfully",
+        "user_id": new_user.id,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": new_user.id,
+            "name": new_user.name,
+            "email": new_user.email
+        }
+    }
 
 # LOGIN ROUTE
 
@@ -50,4 +67,20 @@ def login(auth_data: AuthData, db: Session = Depends(get_db)):
     if not user or not verify_password(auth_data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    return {"message": "Login successful", "user_id": user.id}
+    # Generate access token
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=timedelta(minutes=30)
+    )
+
+    return {
+        "message": "Login successful",
+        "user_id": user.id,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email
+        }
+    }

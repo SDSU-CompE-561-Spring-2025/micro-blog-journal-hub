@@ -6,26 +6,30 @@ import { useEffect, useState } from "react"
 
 export function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  
-  // Initialize darkMode state from localStorage or default to false
-  const [darkMode, setDarkMode] = useState(() => {
-    // Ensure this runs only on the client
-    if (typeof window !== "undefined") {
-      const savedMode = localStorage.getItem("darkMode")
-      return savedMode === "true"
-    }
-    return false // Default for SSR or if window is not available
-  })
+  const [mounted, setMounted] = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
 
-  // Effect to check login status on mount
+  // Effect to initialize state from localStorage after mount
   useEffect(() => {
+    setMounted(true)
     const token = localStorage.getItem("token")
     setIsLoggedIn(!!token)
-  }, []) // Empty dependency array, runs once on mount
 
-  // Effect to apply dark mode class to <html> and persist to localStorage
-  // Runs after initial render and whenever `darkMode` state changes
+    // Initialize dark mode from localStorage or system preference
+    const savedMode = localStorage.getItem("darkMode")
+    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+    const initialDarkMode = savedMode !== null ? savedMode === "true" : systemPrefersDark
+    setDarkMode(initialDarkMode)
+
+    if (initialDarkMode) {
+      document.documentElement.classList.add("dark")
+    }
+  }, [])
+
+  // Effect to handle dark mode changes
   useEffect(() => {
+    if (!mounted) return
+
     if (darkMode) {
       document.documentElement.classList.add("dark")
       localStorage.setItem("darkMode", "true")
@@ -33,20 +37,33 @@ export function Header() {
       document.documentElement.classList.remove("dark")
       localStorage.setItem("darkMode", "false")
     }
-  }, [darkMode]) // Dependency: re-run if darkMode changes
+  }, [darkMode, mounted])
 
   const handleLogout = () => {
     localStorage.removeItem("token")
     setIsLoggedIn(false)
-    // Optional: Reset dark mode on logout if desired
-    // localStorage.removeItem("darkMode");
-    // document.documentElement.classList.remove("dark");
-    // setDarkMode(false); 
     window.location.href = "/login"
   }
 
   const toggleDarkMode = () => {
-    setDarkMode(prevMode => !prevMode)
+    setDarkMode(prev => !prev)
+  }
+
+  // Prevent hydration mismatch by not rendering theme toggle until mounted
+  const renderThemeToggle = () => {
+    if (!mounted) {
+      return <div className="w-[36px] h-[36px]" /> // Placeholder with same size
+    }
+
+    return (
+      <button
+        onClick={toggleDarkMode}
+        aria-label="Toggle dark mode"
+        className="p-2 rounded-full text-white hover:bg-white/20 dark:hover:bg-white/10"
+      >
+        {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
+    )
   }
 
   return (
@@ -69,13 +86,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center space-x-4">
-          <button
-            onClick={toggleDarkMode}
-            aria-label="Toggle dark mode"
-            className="p-2 rounded-full text-white hover:bg-white/20 dark:hover:bg-white/10"
-          >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+          {renderThemeToggle()}
 
           {isLoggedIn ? (
             <button

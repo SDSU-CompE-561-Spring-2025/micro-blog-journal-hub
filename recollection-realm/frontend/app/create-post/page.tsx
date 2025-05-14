@@ -1,76 +1,219 @@
+'use client'
+
 import { Header } from "@/components/header"
 import NavBar from "@/components/Navbar"
 import { InterestTags } from "@/components/interest-tags"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ImagePlus } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { useState, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { toast } from "sonner"
 
-export default function CreatePostPage() {
+// Function to get current user from localStorage
+const getCurrentUser = () => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token')
+    const user = localStorage.getItem('user')
+    return user ? JSON.parse(user) : null
+  }
+  return null
+}
+
+// Function to validate image URL
+const validateImageUrl = async (url: string): Promise<boolean> => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    const contentType = response.headers.get('content-type');
+    return Boolean(response.ok && contentType?.startsWith('image/'));
+  } catch {
+    return false;
+  }
+};
+
+export default function CreatePost() {
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+  const [text, setText] = useState("")
+  const [imageUrl, setImageUrl] = useState("")
+  const [selectedGenre, setSelectedGenre] = useState("")
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+    // Check if user is logged in
+    const user = getCurrentUser()
+    if (!user) {
+      router.push('/login')
+    }
+  }, [router])
+
+  if (!mounted) return null
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB")
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      // Convert to base64
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64String = reader.result as string
+        setImageUrl(base64String)
+        setIsUploading(false)
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error("Error uploading image:", error)
+      toast.error("Failed to upload image")
+      setIsUploading(false)
+    }
+  }
+
+  const handleImageUrlInput = async (url: string) => {
+    setImageUrl(url)
+    if (url) {
+      const isValid = await validateImageUrl(url)
+      if (!isValid) {
+        toast.error("Invalid image URL")
+        setImageUrl("")
+      }
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (!text) {
+      toast.error("Please enter some text")
+      return
+    }
+    if (!selectedGenre) {
+      toast.error("Please select a genre")
+      return
+    }
+
+    const user = getCurrentUser()
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    try {
+      console.log('Sending request with token:', localStorage.getItem('token'))
+      const response = await fetch('http://localhost:8000/api/posts/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          text,
+          image_url: imageUrl,
+          genre: selectedGenre
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        console.error('Server response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
+        throw new Error(errorData?.detail || 'Failed to create post')
+      }
+
+      toast.success("Post created successfully!")
+      router.push('/whats-new')
+    } catch (error) {
+      console.error("Error creating post:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to create post")
+    }
+  }
+
   return (
-    // Page background: Consistent with WhatsNew
-    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900">
+    <div className="min-h-screen bg-background">
       <Header />
       <NavBar />
+      <main className="container mx-auto p-4">
+        <Card className="w-full max-w-4xl mx-auto">
+          <CardHeader>
+            <CardTitle>Create a New Post</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Textarea
+                placeholder="What's on your mind?"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                className="min-h-[150px]"
+              />
 
-      <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
-        {/* Main heading: Brighter text for dark mode */}
-        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-slate-100">Create post:</h1>
-
-        {/* Outer Card: Light gray in light mode, darker gray (gray-800) in dark mode like WhatsNew feed content area */}
-        <Card className="bg-gray-100 dark:bg-gray-800 p-4 mb-6">
-          <CardContent className="p-0">
-            {/* Interest section: blue-100 in light, slate-700 in dark (distinct from card background) */}
-            <div className="bg-blue-100 dark:bg-slate-700 rounded-xl p-6 mb-6">
-              <h3 className="text-xl mb-4 text-gray-800 dark:text-slate-100">What interest would you like to choose?</h3>
-              <InterestTags />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Inner Cards: blue-100 in light, slate-700 in dark */}
-              <Card className="bg-blue-100 dark:bg-slate-700 p-4">
-                <CardHeader className="p-0 pb-4">
-                  <CardTitle className="text-xl text-gray-800 dark:text-slate-100">Upload Video/photo</CardTitle>
-                </CardHeader>
-                {/* Content area within card: white in light, slate-600 (slightly lighter than card) in dark */}
-                <CardContent className="p-0 flex justify-center items-center h-40 bg-white dark:bg-slate-600 rounded-md">
-                  <ImagePlus className="h-16 w-16 text-gray-400 dark:text-slate-400" />
-                </CardContent>
-              </Card>
-
-              <Card className="bg-blue-100 dark:bg-slate-700 p-4">
-                <CardHeader className="p-0 pb-4">
-                  <CardTitle className="text-xl text-gray-800 dark:text-slate-100">Entry</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {/* Textarea: white in light, slate-600 (like upload area) in dark. Text and placeholder updated. */}
-                  <Textarea
-                    placeholder="Type here...."
-                    className="h-40 bg-white dark:bg-slate-600 dark:text-slate-100 dark:placeholder-slate-400 border-gray-300 dark:border-slate-500 focus:ring-blue-500 dark:focus:ring-blue-500"
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Add an image:</p>
+                <div className="flex gap-4 items-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                  >
+                    <ImagePlus className="mr-2 h-4 w-4" />
+                    Upload Image
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
                   />
-                </CardContent>
-              </Card>
+                  <p className="text-sm text-muted-foreground">or</p>
+                  <input
+                    type="text"
+                    placeholder="Enter image URL"
+                    className="flex-1 px-3 py-2 border rounded-md"
+                    value={imageUrl}
+                    onChange={(e) => handleImageUrlInput(e.target.value)}
+                  />
+                </div>
+                {imageUrl && (
+                  <div className="mt-4">
+                    <Image
+                      src={imageUrl}
+                      alt="Preview"
+                      width={200}
+                      height={200}
+                      className="rounded-md object-cover"
+                    />
+                  </div>
+                )}
+              </div>
 
-              <Card className="bg-blue-100 dark:bg-slate-700 p-4">
-                <CardHeader className="p-0 pb-4">
-                  <CardTitle className="text-xl text-gray-800 dark:text-slate-100">Archive</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {/* List text: darker gray in light, lighter slate in dark */}
-                  <ul className="list-disc pl-6 space-y-1 text-gray-700 dark:text-slate-300">
-                    <li>Entry 1</li>
-                    <li>Entry 2</li>
-                    <li>Entry 3</li>
-                    <li>Entry 4</li>
-                  </ul>
-                </CardContent>
-              </Card>
+              <div>
+                <p className="text-sm font-medium mb-2">Select Genre:</p>
+                <InterestTags
+                  selectedTags={selectedGenre ? [selectedGenre] : []}
+                  onTagSelect={(tag) => setSelectedGenre(tag)}
+                  className="flex flex-wrap gap-2"
+                />
+              </div>
 
-              <Card className="bg-blue-100 dark:bg-slate-700 p-4">
-                <CardHeader className="p-0 pb-4">
-                  <CardTitle className="text-xl text-gray-800 dark:text-slate-100">Explore</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">{/* Empty explore section */}</CardContent>
-              </Card>
+              <Button
+                onClick={handleSubmit}
+                className="w-full"
+                disabled={isUploading || !text || !selectedGenre}
+              >
+                Create Post
+              </Button>
             </div>
           </CardContent>
         </Card>
