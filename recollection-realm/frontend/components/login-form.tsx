@@ -31,7 +31,7 @@ export function LoginForm() {
 
       // Save token and redirect
       localStorage.setItem("token", data.access_token)
-      window.location.href = "/feed"
+      window.location.href = "/"
     } catch (err) {
       setError("Login failed. Please try again.")
       console.error(err)
