@@ -1,145 +1,173 @@
 'use client'
 import { Header } from "@/components/header"
 import NavBar from "@/components/Navbar"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Heart, MessageCircle, Share2, MoreVertical } from "lucide-react"
 import Image from "next/image"
-import React, { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { toast } from "sonner"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { format } from "date-fns"
+
+interface Post {
+  id: number
+  text: string
+  image_url: string | null
+  genre: string
+  likes: number
+  created_at: string
+  username: string
+  comments: Comment[]
+}
+
+interface Comment {
+  id: number
+  text: string
+  created_at: string
+  user_id: number
+}
 
 export default function WhatsNew() {
-  const router = useRouter()
-
+  const [posts, setPosts] = useState<Post[]>([])
+  const [mounted, setMounted] = useState(false)
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set())
-  const [posts, setPosts] = useState([
-    {
-      user: "Rhilo Sotto",
-      text: "I explored the vibrant jungles of Costa Rica with breathtaking waterfalls, rare wildlife, and unforgettable hikes. Completing this Bucket List journey felt surreal. Next destination... the tranquil beaches of The Bahamas!",
-      image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80",
-      likes: 0,
-      comments: [] as string[],
-      genre: "Adventure",
-      time: "3:42 PM"
-    },
-    {
-      user: "John Guerrero",
-      text: "A spontaneous weekend getaway turned into the best trip this year. Discovered hidden coves, tasted local cuisine, and embraced the calm. Thanks to this amazing new travel app!",
-      image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
-      likes: 0,
-      comments: [],
-      genre: "Travel",
-      time: "10:17 AM"
-    },
-    {
-      user: "Maria Chen",
-      text: "Months of persistence and training paid off—crossing that marathon finish line was a life-changing experience! Nothing beats the energy of the crowd and the pride of reaching your goal.",
-      image: "https://images.pexels.com/photos/2402777/pexels-photo-2402777.jpeg",
-      likes: 0,
-      comments: [],
-      genre: "Fitness",
-      time: "7:53 PM"
-    },
-    {
-      user: "Alex Rodriguez",
-      text: "After countless trials, I finally perfected the soufflé. Fluffy, golden, and light as air—turns out, the secret really is in the egg whites. Cooking is truly an art form!",
-      image: "https://images.pexels.com/photos/4252136/pexels-photo-4252136.jpeg",
-      likes: 0,
-      comments: [],
-      genre: "Cooking",
-      time: "12:05 PM"
-    }
-  ])
 
-  const handleLike = (index: number) => {
-    const updated = [...posts]
-    const liked = new Set(likedPosts)
-    if (liked.has(index)) {
-      updated[index].likes -= 1
-      liked.delete(index)
-    } else {
-      updated[index].likes += 1
-      liked.add(index)
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/posts', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch posts')
+      }
+
+      const data = await response.json()
+      setPosts(data)
+    } catch (error) {
+      console.error("Error fetching posts:", error)
+      toast.error("Failed to fetch posts")
     }
-    setPosts(updated)
-    setLikedPosts(liked)
   }
 
-  const handleComment = (index: number, comment: string) => {
-    if (!comment.trim()) return
-    const updated = [...posts]
-    updated[index].comments.push(comment)
-    setPosts(updated)
+  useEffect(() => {
+    setMounted(true)
+    fetchPosts()
+  }, [])
+
+  if (!mounted) return null
+
+  const handleLike = async (postId: number) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to like post')
+      }
+
+      const updatedPost = await response.json()
+      setPosts(posts.map(post =>
+        post.id === postId ? { ...post, likes: updatedPost.likes } : post
+      ))
+      setLikedPosts(new Set([...likedPosts, postId]))
+    } catch (error) {
+      console.error("Error liking post:", error)
+      toast.error("Failed to like post")
+    }
+  }
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
   }
 
   return (
-    <main className="min-h-screen bg-[#F7F7F7] dark:bg-slate-900">
+    <div className="min-h-screen bg-background">
       <Header />
-      {/* NavBar is rendered directly. Its own styles will make it full-width.
-          Padding for NavBar items is handled within NavBar.tsx for alignment with page content. */}
       <NavBar />
-
-      <div className="p-6"> {/* This p-6 sets the padding for the main content area */}
-        <div className="max-w-[1400px] mx-auto">
-          {/* What's New Feed */}
-          <div className="bg-purple-500 dark:bg-purple-700 rounded-t-2xl border border-black dark:border-gray-700 overflow-hidden">
-            <div className="p-3 border-b border-black dark:border-gray-700 flex justify-between items-center">
-              <h2 className="text-white font-inter text-lg">What's New Feed</h2>
-              <div className="text-sm text-blue-300 dark:text-blue-400 italic flex-grow text-right px-4 whitespace-nowrap overflow-hidden text-ellipsis">
-                Explore: Adventure | Travel | Fitness | Cooking | Gaming | Photography | Nature | Technology | Wellness | Art | Food | Hiking | Reading
-              </div>
-            </div>
-            <div className="bg-[#D9D9D9] dark:bg-gray-800 border-t border-black dark:border-gray-700 p-4 space-y-4">
-              {posts.map((post, idx) => (
-                <div 
-                  key={idx} 
-                  className={`p-3 rounded-md border border-black dark:border-gray-600 flex flex-col gap-2 bg-white dark:bg-gray-700 dark:text-gray-100`}
-                >
-                  <div className="flex gap-4">
-                    <div className="w-64 h-40 flex-shrink-0 border border-black dark:border-gray-600 rounded-md overflow-hidden">
-                      <Image src={post.image} alt={`${post.user} image`} width={256} height={160} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex flex-col justify-between flex-grow">
-                      <div>
-                        <h3 className="font-semibold mb-1">{post.user}</h3>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">{post.text}</p>
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 text-right">Posted at {post.time}</div>
-                    </div>
+      <main className="container mx-auto p-4">
+        <div className="max-w-2xl mx-auto space-y-6">
+          {posts.map((post) => (
+            <Card key={post.id} className="overflow-hidden">
+              <CardHeader className="p-4">
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${post.username}`} />
+                    <AvatarFallback>{getInitials(post.username)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{post.username}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(post.created_at), 'MMM d, yyyy')} • {post.genre}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-4 mt-2">
-                    <button onClick={() => handleLike(idx)} className="text-sm text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
-                      👍 {post.likes}
-                    </button>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault()
-                        const commentInput = e.currentTarget.elements.namedItem("comment") as HTMLInputElement
-                        if (!commentInput.value.trim()) return
-                        handleComment(idx, commentInput.value)
-                        commentInput.value = ""
-                      }}
-                      className="flex flex-grow items-center gap-2"
-                    >
-                      <input 
-                        name="comment" 
-                        placeholder="Add a comment..." 
-                        className="flex-grow px-2 py-1 text-sm border border-gray-400 rounded bg-gray-100 
-                                   dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400" 
-                      />
-                      <button type="submit" className="text-sm text-green-700 hover:underline dark:text-green-400 dark:hover:text-green-300">Post</button>
-                    </form>
-                  </div>
-                  {post.comments.length > 0 && (
-                    <div className="ml-4 mt-2 space-y-1 text-sm text-gray-800 dark:text-gray-300">
-                      {post.comments.map((c, i) => (
-                        <div key={i}>💬 {c}</div>
-                      ))}
-                    </div>
-                  )}
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-5 w-5 text-muted-foreground" />
+                  </Button>
                 </div>
-              ))}
-            </div>
-          </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {post.image_url && (
+                  <div className="relative h-[400px] w-full">
+                    <Image
+                      src={post.image_url}
+                      alt="Post image"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
+                )}
+                <div className="p-4">
+                  <p className="text-base leading-relaxed mb-4">{post.text}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex items-center space-x-2"
+                        onClick={() => handleLike(post.id)}
+                        disabled={likedPosts.has(post.id)}
+                      >
+                        <Heart
+                          className={`h-5 w-5 ${likedPosts.has(post.id)
+                              ? 'fill-red-500 text-red-500'
+                              : 'text-muted-foreground'
+                            }`}
+                        />
+                        <span>{post.likes}</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex items-center space-x-2"
+                      >
+                        <MessageCircle className="h-5 w-5 text-muted-foreground" />
+                        <span>{post.comments.length}</span>
+                      </Button>
+                    </div>
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                      <Share2 className="h-5 w-5 text-muted-foreground" />
+                      <span>Share</span>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }

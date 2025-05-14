@@ -1,32 +1,27 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-const interests = [
-  "Sports",
-  "News",
-  "College Resources",
-  "Diet Plans",
-  "The Grammys",
-  "Conspiracies",
-  "Cinema",
-  "Astrology",
-  "Playstation",
-  "History Channel",
-]
+interface InterestTagsProps {
+  selectedTags: string[]
+  onTagSelect: (tag: string) => void
+  className?: string
+}
 
-export function InterestTags() {
+export function InterestTags({ selectedTags, onTagSelect, className }: InterestTagsProps) {
+  const interests = ["Adventure", "Travel", "Fitness", "Cooking", "Gaming", "Photography", "Nature", "Technology"]
+
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={className}>
       {interests.map((interest) => (
-        <Badge
+        <Button
           key={interest}
-          className="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded-md flex items-center gap-1"
+          variant={selectedTags.includes(interest) ? "default" : "outline"}
+          onClick={() => onTagSelect(interest)}
+          className="rounded-full"
         >
-          <X className="h-4 w-4" />
-          <span>{interest}</span>
-        </Badge>
+          {interest}
+        </Button>
       ))}
     </div>
   )

@@ -7,11 +7,11 @@ from app.database.connection import get_db
 from app.models.user import User
 
 # Constants for JWT
-SECRET_KEY = "your-secret-key"  # In production, use a secure key and environment variables
+SECRET_KEY = "YOUR_SECRET_KEY"  # Match the key in utils.py
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")  # Update to match the actual login endpoint
 
 def create_access_token(data: dict):
     to_encode = data.copy()
